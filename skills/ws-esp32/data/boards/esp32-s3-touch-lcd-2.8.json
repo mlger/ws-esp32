@@ -1,0 +1,181 @@
+{
+  "$schema": "../board.schema.json",
+  "id": "esp32-s3-touch-lcd-2.8",
+  "name": "ESP32-S3-Touch-LCD-2.8",
+  "aliases": [
+    "2.8 touch",
+    "s3 2.8"
+  ],
+  "chip": "esp32s3",
+  "soc": "ESP32-S3R8",
+  "flash_mb": 16,
+  "psram_mb": 8,
+  "psram_mode": "octal",
+  "usb": {
+    "native": true,
+    "bridge": null,
+    "console": "usb_serial_jtag"
+  },
+  "verification": {
+    "status": "wiki",
+    "sources": [
+      "https://www.waveshare.com/wiki/ESP32-S3-Touch-LCD-2.8"
+    ],
+    "checked": "2026-10-21",
+    "notes": "Pins transcribed from the wiki's internal-connection tables."
+  },
+  "peripherals": [
+    {
+      "id": "spi",
+      "kind": "bus",
+      "protocol": "spi",
+      "pins": {
+        "mosi": 45,
+        "sclk": 40
+      }
+    },
+    {
+      "id": "lcd",
+      "kind": "display",
+      "part": "ST7789",
+      "bus": "spi",
+      "interface": "spi",
+      "resolution": [
+        240,
+        320
+      ],
+      "pins": {
+        "cs": 42,
+        "dc": 41,
+        "rst": 39,
+        "bl": 5
+      },
+      "panel_init": {
+        "rgb_order": "rgb",
+        "invert": true,
+        "mirror_x": false,
+        "mirror_y": false,
+        "swap_xy": false,
+        "gap": [
+          0,
+          0
+        ],
+        "pclk_mhz": 40,
+        "verified": false,
+        "source": "Generic ST7789 IPS defaults; confirm against the Waveshare demo"
+      }
+    },
+    {
+      "id": "tp_i2c",
+      "kind": "bus",
+      "protocol": "i2c",
+      "pins": {
+        "sda": 1,
+        "scl": 3
+      },
+      "notes": "Touch has its own I2C bus."
+    },
+    {
+      "id": "touch",
+      "kind": "touch",
+      "part": "CST328",
+      "bus": "tp_i2c",
+      "addr": null,
+      "pins": {
+        "int": 4,
+        "rst": 2
+      }
+    },
+    {
+      "id": "i2c",
+      "kind": "bus",
+      "protocol": "i2c",
+      "pins": {
+        "sda": 11,
+        "scl": 10
+      },
+      "reserved_addrs": [
+        "0x51",
+        "0x6B",
+        "0x7E"
+      ],
+      "notes": "Sensor bus, also on the I2C header. Waveshare lists 0x51, 0x6B and 0x7E as taken."
+    },
+    {
+      "id": "imu",
+      "kind": "imu",
+      "part": "QMI8658",
+      "bus": "i2c",
+      "addr": "0x6B",
+      "pins": {
+        "int1": 13,
+        "int2": 12
+      }
+    },
+    {
+      "id": "rtc",
+      "kind": "rtc",
+      "part": "PCF85063",
+      "bus": "i2c",
+      "addr": "0x51",
+      "pins": {
+        "int": 9
+      }
+    },
+    {
+      "id": "audio",
+      "kind": "codec",
+      "part": "PCM5101",
+      "pins": {
+        "bclk": 48,
+        "ws": 38,
+        "dout": 47
+      },
+      "notes": "I2S DAC for the speaker. dout = ESP32 output into the PCM5101's DIN."
+    },
+    {
+      "id": "sd",
+      "kind": "storage",
+      "part": "TF card",
+      "interface": "sdmmc_1bit",
+      "pins": {
+        "d0": 16,
+        "cmd": 17,
+        "clk": 14,
+        "d3": 21
+      },
+      "notes": "Also works in SPI mode: MISO=16, MOSI=17, SCK=14, CS=21."
+    },
+    {
+      "id": "boot_button",
+      "kind": "button",
+      "pins": {
+        "io": 0
+      },
+      "soft": true
+    },
+    {
+      "id": "usb",
+      "kind": "usb",
+      "pins": {
+        "dm": 19,
+        "dp": 20
+      }
+    }
+  ],
+  "free_pins": [
+    15,
+    18,
+    43,
+    44
+  ],
+  "software": {
+    "arduino_core": "3.0.2",
+    "lvgl": null,
+    "esp_idf": null
+  },
+  "warnings": [
+    "The header's I2C pins (GPIO10/11) are the onboard sensor bus and can't be used as plain GPIO.",
+    "Touch (CST328) code is not generated yet; --with display gives the screen only."
+  ]
+}

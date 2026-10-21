@@ -14,7 +14,7 @@ def test_all_profiles_valid(boards, chips):
 
 
 def test_at_least_one_board(boards):
-    assert len(boards) >= 7
+    assert len(boards) >= 11
 
 
 @pytest.mark.parametrize("query,expected", [
@@ -22,6 +22,9 @@ def test_at_least_one_board(boards):
     ("ESP32-C6-LCD-1.47", "esp32-c6-lcd-1.47"),
     ("s3 zero", "esp32-s3-zero"),
     ("4.3", "esp32-s3-touch-lcd-4.3"),
+    ("7", "esp32-s3-touch-lcd-7"),
+    ("2.8", "esp32-s3-touch-lcd-2.8"),
+    ("1.28", "esp32-s3-touch-lcd-1.28"),
 ])
 def test_find_board(boards, query, expected):
     board, _ = find_board(query, boards)
@@ -89,3 +92,12 @@ def test_referenced_files_exist():
     text = (skill / "SKILL.md").read_text(encoding="utf-8")
     for rel in set(re.findall(r"`(references/[\w/.-]+\.md)`", text)):
         assert (skill / rel).exists(), rel
+
+
+def test_schema(boards, chips):
+    jsonschema = pytest.importorskip("jsonschema")
+    schema = json.loads((ROOT / "skills" / "ws-esp32" / "data" / "board.schema.json").read_text(encoding="utf-8"))
+    assert set(schema["properties"]["chip"]["enum"]) == set(chips)
+    for b in boards.values():
+        data = {k: v for k, v in b.items() if not k.startswith("_")}
+        jsonschema.validate(data, schema)

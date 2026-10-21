@@ -109,5 +109,8 @@ def test_unknown_bus(boards, chips):
 
 
 def test_partial_profile_warns(boards, chips):
-    f = check(boards, chips, "esp32-s3-touch-amoled-1.8", "10=gpio_out")
+    import copy
+    b = copy.deepcopy(boards["esp32-c6-zero"])
+    b["verification"]["status"] = "partial"
+    f = check_pins(b, chips, [parse_use("10=gpio_out")])
     assert f[0]["level"] == "warn" and "partial" in f[0]["message"]
