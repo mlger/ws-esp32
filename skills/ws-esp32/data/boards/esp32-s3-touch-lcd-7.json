@@ -1,0 +1,184 @@
+{
+  "$schema": "../board.schema.json",
+  "id": "esp32-s3-touch-lcd-7",
+  "name": "ESP32-S3-Touch-LCD-7",
+  "aliases": [
+    "7 inch",
+    "s3 7 rgb"
+  ],
+  "chip": "esp32s3",
+  "soc": "ESP32-S3-WROOM-1-N16R8",
+  "flash_mb": 16,
+  "psram_mb": 8,
+  "psram_mode": "octal",
+  "usb": {
+    "native": true,
+    "bridge": "CH343P",
+    "console": "uart0",
+    "notes": "Two Type-C ports: native USB (GPIO19/20) and a CH343P UART port. Native USB is muxed with CAN via CH422G EXIO5."
+  },
+  "verification": {
+    "status": "wiki",
+    "sources": [
+      "https://www.waveshare.com/wiki/ESP32-S3-Touch-LCD-7",
+      "https://github.com/waveshareteam/ESP32-S3-Touch-LCD-7/blob/main/examples/Arduino/examples/08_DrawColorBar/waveshare_lcd_port.h"
+    ],
+    "checked": "2026-10-21",
+    "notes": "Pins from the wiki tables; timings and expander map from Waveshare's demo. Same LCD design as the 4.3."
+  },
+  "peripherals": [
+    {
+      "id": "i2c",
+      "kind": "bus",
+      "protocol": "i2c",
+      "pins": {
+        "sda": 8,
+        "scl": 9
+      },
+      "reserved_addrs": [
+        "0x20-0x27",
+        "0x30-0x3F",
+        "0x5D"
+      ],
+      "notes": "Shared by GT911, CH422G and the external I2C terminal."
+    },
+    {
+      "id": "spi",
+      "kind": "bus",
+      "protocol": "spi",
+      "pins": {
+        "mosi": 11,
+        "sclk": 12,
+        "miso": 13
+      }
+    },
+    {
+      "id": "expander",
+      "kind": "io_expander",
+      "part": "CH422G",
+      "bus": "i2c",
+      "addr": null,
+      "pins": {},
+      "notes": "EXIO1=TP_RST, EXIO2=LCD_BL, EXIO3=LCD_RST, EXIO4=SD_CS, EXIO5=USB_SEL (low = USB, high = CAN)."
+    },
+    {
+      "id": "lcd",
+      "kind": "display",
+      "part": "ST7262",
+      "interface": "rgb565",
+      "resolution": [
+        800,
+        480
+      ],
+      "pins": {
+        "r3": 1,
+        "r4": 2,
+        "r5": 42,
+        "r6": 41,
+        "r7": 40,
+        "g2": 39,
+        "g3": 0,
+        "g4": 45,
+        "g5": 48,
+        "g6": 47,
+        "g7": 21,
+        "b3": 14,
+        "b4": 38,
+        "b5": 18,
+        "b6": 17,
+        "b7": 10,
+        "vsync": 3,
+        "hsync": 46,
+        "de": 5,
+        "pclk": 7,
+        "bl": "EXIO2",
+        "rst": "EXIO3"
+      },
+      "notes": "16-bit RGB565, data order D0-D15 = B3-B7, G2-G7, R3-R7. Needs PSRAM frame buffers.",
+      "idf_components": [
+        "espressif/esp_lvgl_port"
+      ],
+      "arduino_libs": [
+        "ESP32_Display_Panel@0.1.4",
+        "ESP32_IO_Expander@0.0.4",
+        "lvgl@8.4.0"
+      ],
+      "rgb_timing": {
+        "pclk_hz": 16000000,
+        "hsync_pulse_width": 4,
+        "hsync_back_porch": 8,
+        "hsync_front_porch": 8,
+        "vsync_pulse_width": 4,
+        "vsync_back_porch": 8,
+        "vsync_front_porch": 8,
+        "bounce_buffer_lines": 10,
+        "source": "waveshare_lcd_port.h (Waveshare demo)"
+      }
+    },
+    {
+      "id": "touch",
+      "kind": "touch",
+      "part": "GT911",
+      "bus": "i2c",
+      "addr": "0x5D",
+      "pins": {
+        "int": 4,
+        "rst": "EXIO1"
+      },
+      "idf_components": [
+        "espressif/esp_lcd_touch_gt911"
+      ]
+    },
+    {
+      "id": "sd",
+      "kind": "storage",
+      "part": "TF card",
+      "bus": "spi",
+      "pins": {
+        "cs": "EXIO4"
+      }
+    },
+    {
+      "id": "can",
+      "kind": "can",
+      "part": "CAN transceiver",
+      "pins": {
+        "tx": 20,
+        "rx": 19
+      },
+      "share": "usb_can",
+      "notes": "Shares GPIO19/20 with native USB. EXIO5 high = CAN, low = USB."
+    },
+    {
+      "id": "rs485",
+      "kind": "uart",
+      "part": "RS485 transceiver",
+      "pins": {
+        "tx": 15,
+        "rx": 16
+      },
+      "notes": "Auto direction. Termination by jumper."
+    },
+    {
+      "id": "usb",
+      "kind": "usb",
+      "pins": {
+        "dm": 19,
+        "dp": 20
+      },
+      "share": "usb_can"
+    }
+  ],
+  "free_pins": null,
+  "software": {
+    "arduino_core": null,
+    "lvgl": null,
+    "esp_idf": "5.5.2"
+  },
+  "warnings": [
+    "Almost every GPIO is used by the RGB panel. Check the wiki pinout image for spare pins before adding hardware.",
+    "CAN and native USB share GPIO19/20 (EXIO5 selects). Flash through the CH343 UART port when using CAN.",
+    "Avoid I2C addresses 0x20-0x27, 0x30-0x3F and 0x5D on the shared bus.",
+    "Screen drift with Wi-Fi on is usually PSRAM bandwidth: the generated display code uses a bounce buffer and the PSRAM XIP options."
+  ]
+}

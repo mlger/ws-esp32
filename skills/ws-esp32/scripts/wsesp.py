@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from wslib import __version__  # noqa: E402
 from wslib.data import find_board, load_boards, load_chips, validate_board  # noqa: E402
+from wslib.device import decode, find_addr2line, match_boards, parse_backtrace, parse_esptool, run_esptool  # noqa: E402
 from wslib.display import UnsupportedDisplay, display_support  # noqa: E402
 from wslib.doctor import list_ports, run_doctor  # noqa: E402
 from wslib.pins import check_pins, has_errors, parse_use  # noqa: E402
@@ -126,7 +127,8 @@ def cmd_new(args) -> int:
     board = _get_board(args.board)
     chip = load_chips()[board["chip"]]
     try:
-        files = plan_project(board, chip, args.framework, args.name, with_display="display" in (args.with_ or []))
+        files = plan_project(board, chip, args.framework, args.name, with_display="display" in (args.with_ or []),
+                             devcontainer="devcontainer" in (args.with_ or []))
     except UnsupportedDisplay as e:
         sys.exit(f"Can't generate display code for {board['name']}: {e}")
     except ValueError as e:
@@ -182,6 +184,49 @@ def cmd_ports(args) -> int:
     return 0
 
 
+def cmd_detect(args) -> int:
+    port = args.port
+    if not port:
+        ports = list_ports()
+        esp = [p for p in ports["ports"] if p["kind"] != "unknown"]
+        if len(esp) != 1:
+            sys.exit("Pass --port (found " + (", ".join(p["device"] for p in esp) or "no ESP32-looking ports")
+                     + "). Run 'wsesp.py ports' to list them.")
+        port = esp[0]["device"]
+    print(f"Reading chip info on {port} (this resets the board)...")
+    try:
+        info = parse_esptool(run_esptool(port))
+    except RuntimeError as e:
+        sys.exit(str(e))
+    hits = match_boards(info, load_boards())
+    if args.json:
+        _print_json({"port": port, **info, "matches": hits})
+        return 0 if hits else 1
+    print(f"Chip: {info['chip_name']}  flash: {info['flash_mb']} MB  in-package PSRAM: {info['psram_mb']} MB")
+    if hits:
+        print("Matching profiles: " + ", ".join(hits))
+    else:
+        print("No profile matches. If it is a Waveshare board, see references/workflows/add-board.md.")
+    return 0 if hits else 1
+
+
+def cmd_decode(args) -> int:
+    text = sys.stdin.read() if args.log == "-" else Path(args.log).read_text(encoding="utf-8", errors="replace")
+    addrs = parse_backtrace(text)
+    if not addrs:
+        sys.exit("No backtrace addresses found (look for 'Backtrace:' or 'MEPC' lines in the log).")
+    chip = args.chip
+    if not chip and args.board:
+        chip = _get_board(args.board)["chip"]
+    tool = find_addr2line(chip or "", args.addr2line)
+    if not tool:
+        print("addr2line not found; run this from an ESP-IDF terminal, or pass --addr2line. Addresses:")
+        print(" ".join(addrs))
+        return 1
+    print(decode(args.elf, addrs, tool))
+    return 0
+
+
 def cmd_validate(args) -> int:
     chips = load_chips()
     problems = []
@@ -225,8 +270,8 @@ def main(argv=None) -> int:
     s.add_argument("--framework", choices=FRAMEWORKS, default="idf")
     s.add_argument("--name", required=True)
     s.add_argument("--out", help="output directory (default: ./NAME)")
-    s.add_argument("--with", dest="with_", action="append", choices=["display"],
-                   help="extra features: display = LCD/touch/LVGL code (ESP-IDF, SPI panels)")
+    s.add_argument("--with", dest="with_", action="append", choices=["display", "devcontainer"],
+                   help="extras (repeatable): display = LCD/touch/LVGL code; devcontainer = VS Code dev container")
     s.add_argument("--force", action="store_true", help="overwrite existing files")
     s.add_argument("--dry-run", action="store_true")
     s.set_defaults(fn=cmd_new)
@@ -238,6 +283,19 @@ def main(argv=None) -> int:
     s = sub.add_parser("ports", help="list serial ports and identify USB chips")
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_ports)
+
+    s = sub.add_parser("detect", help="identify the connected board with esptool")
+    s.add_argument("--port", help="serial port (default: the only ESP32-looking port)")
+    s.add_argument("--json", action="store_true")
+    s.set_defaults(fn=cmd_detect)
+
+    s = sub.add_parser("decode", help="turn a crash backtrace into file:line")
+    s.add_argument("elf", help="firmware ELF, e.g. build/app.elf")
+    s.add_argument("log", help="file with the serial log, or '-' for stdin")
+    s.add_argument("--board", help="board id (picks the right addr2line)")
+    s.add_argument("--chip", choices=["esp32", "esp32s3", "esp32c3", "esp32c6"])
+    s.add_argument("--addr2line", help="path to the toolchain's addr2line")
+    s.set_defaults(fn=cmd_decode)
 
     s = sub.add_parser("validate-data", help="check every board profile (used by CI)")
     s.set_defaults(fn=cmd_validate)

@@ -1,4 +1,5 @@
 {
+  "$schema": "../board.schema.json",
   "id": "esp32-s3-touch-amoled-1.8",
   "name": "ESP32-S3-Touch-AMOLED-1.8",
   "aliases": ["amoled 1.8", "sh8601"],
@@ -9,38 +10,43 @@
   "psram_mode": "octal",
   "usb": {"native": true, "bridge": null, "console": "usb_serial_jtag"},
   "verification": {
-    "status": "partial",
-    "sources": ["https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-1.8"],
+    "status": "wiki",
+    "sources": [
+      "https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-1.8",
+      "https://github.com/waveshareteam/ESP32-S3-Touch-AMOLED-1.8/blob/main/examples/arduino/libraries/Mylibrary/pin_config.h"
+    ],
     "checked": "2026-10-21",
-    "notes": "The wiki gives display/touch/I2C/I2S pins only as macros in the demo pin header. Fill them in from the schematic or the demo's pin_config.h."
+    "notes": "GPIOs from Waveshare's demo pin_config.h. I2C addresses are typical values for these chips, not stated by Waveshare."
   },
   "peripherals": [
-    {"id": "i2c", "kind": "bus", "protocol": "i2c", "pins": {"sda": null, "scl": null}},
-    {"id": "spi", "kind": "bus", "protocol": "spi", "pins": {"mosi": 1, "miso": 3, "sclk": 2},
-     "notes": "SD card in SPI mode (demo 14). Demo 04 uses SDMMC instead."},
+    {"id": "i2c", "kind": "bus", "protocol": "i2c", "pins": {"sda": 15, "scl": 14}},
     {"id": "expander", "kind": "io_expander", "part": "TCA9554", "bus": "i2c", "addr": "0x20", "addr_verified": false,
-     "pins": {}, "notes": "EXIO4 = PWR button input, EXIO7 = SD CS. Demo configures EXIO0/1/2/6 (display power among them)."},
+     "pins": {}, "notes": "EXIO4 = PWR button input, EXIO7 = SD CS (SPI mode). Demo configures EXIO0/1/2/6 (display power among them)."},
     {"id": "lcd", "kind": "display", "part": "SH8601", "interface": "qspi", "resolution": [368, 448],
-     "pins": {"cs": null, "sclk": null, "d0": null, "d1": null, "d2": null, "d3": null},
+     "pins": {"cs": 12, "sclk": 11, "d0": 4, "d1": 5, "d2": 6, "d3": 7},
      "notes": "No reset pin (-1). Brightness via register 0x51 (0-255), there is no backlight GPIO.",
      "idf_components": ["espressif/esp_lcd_sh8601", "espressif/esp_lvgl_port"],
      "arduino_libs": ["GFX_Library_for_Arduino@1.4.9", "lvgl@8.4.0"]},
-    {"id": "touch", "kind": "touch", "part": "FT3168", "bus": "i2c", "addr": "0x38", "addr_verified": false, "pins": {}},
+    {"id": "touch", "kind": "touch", "part": "FT3168", "bus": "i2c", "addr": "0x38", "addr_verified": false,
+     "pins": {"int": 21}},
     {"id": "pmu", "kind": "pmu", "part": "AXP2101", "bus": "i2c", "addr": "0x34", "addr_verified": false, "pins": {},
      "arduino_libs": ["XPowersLib@0.2.6"]},
     {"id": "rtc", "kind": "rtc", "part": "PCF85063", "bus": "i2c", "addr": "0x51", "addr_verified": false, "pins": {}},
     {"id": "imu", "kind": "imu", "part": "QMI8658", "bus": "i2c", "addr": null, "pins": {},
      "arduino_libs": ["SensorLib@0.2.1"]},
     {"id": "audio", "kind": "codec", "part": "ES8311", "bus": "i2c", "addr": "0x18", "addr_verified": false,
-     "pins": {"mclk": null, "bclk": null, "ws": null, "dout": null, "din": null}},
-    {"id": "sd", "kind": "storage", "part": "TF card", "bus": "spi", "pins": {"cs": "EXIO7"}},
+     "pins": {"mclk": 16, "bclk": 9, "ws": 45, "dout": 8, "din": 10, "pa": 46},
+     "notes": "dout/din are from the ESP32 side (I2S_DO_IO=8, I2S_DI_IO=10). pa = speaker amplifier enable."},
+    {"id": "sd", "kind": "storage", "part": "TF card", "interface": "sdmmc_1bit",
+     "pins": {"clk": 2, "cmd": 1, "d0": 3},
+     "notes": "The same pins also work in SPI mode (SCK=2, MOSI=1, MISO=3) with CS on EXIO7."},
     {"id": "boot_button", "kind": "button", "pins": {"io": 0}, "soft": true},
     {"id": "usb", "kind": "usb", "pins": {"dm": 19, "dp": 20}}
   ],
   "free_pins": null,
   "software": {"arduino_core": "3.0.6", "lvgl": "8.4.0", "esp_idf": null},
   "warnings": [
-    "Profile is partial: confirm display/touch/I2C/I2S pins before generating driver code.",
+    "GPIO45 and GPIO46 (strapping pins) are used by audio. Don't add external pulls to them.",
     "Power-off: hold PWR 6 s. The AXP2101 controls the rails; a bad PMU config can make the board look dead."
   ]
 }

@@ -1,0 +1,24 @@
+name: Set up arduino-cli with the esp32 core
+description: Installs arduino-cli with the official script (setup-arduino-cli still runs on Node 20) and the esp32 core.
+runs:
+  using: composite
+  steps:
+    - name: Install arduino-cli
+      shell: bash
+      run: |
+        mkdir -p "$HOME/.local/bin"
+        curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$HOME/.local/bin" sh
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+    - uses: actions/cache@v6
+      with:
+        path: ~/.arduino15
+        key: arduino15-esp32-${{ runner.os }}-${{ github.run_id }}
+        restore-keys: arduino15-esp32-${{ runner.os }}-
+    - name: Install esp32 core
+      shell: bash
+      run: |
+        URL=https://espressif.github.io/arduino-esp32/package_esp32_index.json
+        "$HOME/.local/bin/arduino-cli" core update-index --additional-urls "$URL"
+        "$HOME/.local/bin/arduino-cli" core install esp32:esp32 --additional-urls "$URL"
+        "$HOME/.local/bin/arduino-cli" config init --overwrite
+        "$HOME/.local/bin/arduino-cli" config add board_manager.additional_urls "$URL"

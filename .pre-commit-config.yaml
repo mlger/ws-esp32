@@ -1,0 +1,28 @@
+# pip install pre-commit && pre-commit install
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.1
+    hooks:
+      - id: ruff
+        args: [--fix]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-json
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: validate-boards
+        name: validate board profiles
+        entry: python skills/ws-esp32/scripts/wsesp.py validate-data
+        language: system
+        pass_filenames: false
+        files: ^skills/ws-esp32/data/
+      - id: pytest
+        name: pytest
+        entry: python -m pytest -q
+        language: system
+        pass_filenames: false
+        files: \.(py|json|tmpl|mjs)$

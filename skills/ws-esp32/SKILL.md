@@ -21,7 +21,8 @@ The skill directory (the folder holding this file) contains:
 3. **Use generated `board_pins.h`.** Put pins in code through `WS_*` macros from `wsesp.py header <board>`, not hard-coded numbers.
 4. **Match the tested versions.** Profiles list the Arduino core, LVGL and ESP-IDF versions Waveshare's demos use (`software`). LVGL 8 and 9 APIs differ; Arduino-ESP32 2.x and 3.x APIs differ. Ask or check before mixing them.
 5. **Ask before irreversible or risky commands.** Get explicit approval for `esptool erase_flash`, any `espefuse` command (eFuses can't be undone), enabling flash encryption or secure boot, or writing to an unfamiliar serial port. Never burn eFuses as part of a fix.
-6. **Read-only first.** `wsesp.py doctor` only inspects. It never installs anything. Show the user install commands and let them run or approve them.
+6. **The plugin's safety hook** asks the user before eFuse, erase-flash, flash-encryption and secure-boot commands run. Don't try to work around it.
+7. **Read-only first.** `wsesp.py doctor` only inspects. It never installs anything. Show the user install commands and let them run or approve them.
 
 ## Pick the workflow
 
@@ -31,7 +32,8 @@ The skill directory (the folder holding this file) contains:
 | Start a new project for a board | `references/workflows/new-project.md` |
 | Build, flash, monitor, pick a serial port | `references/workflows/build-flash-monitor.md` |
 | Get a display / touch / LVGL working | `wsesp.py show <board>` says whether `new --with display` can generate it; then `references/workflows/display-bringup.md` |
-| Fix a crash, boot loop, "no serial port", flashing errors | `references/workflows/troubleshooting.md` |
+| Fix a crash, boot loop, "no serial port", flashing errors | `references/workflows/troubleshooting.md`; decode crashes with `wsesp.py decode` |
+| Find out which board is plugged in | `wsesp.py detect` (asks esptool; resets the board) |
 | Add hardware (sensor, relay, I2C device) to a board | Run `wsesp.py pins`, then `references/chips.md` |
 | Support a board that has no profile | `references/workflows/add-board.md` |
 | Choose between ESP-IDF, Arduino and PlatformIO | `references/frameworks.md` |
@@ -45,11 +47,17 @@ python scripts/wsesp.py pins esp32-s3-touch-lcd-1.28 --use 16=gpio_out:relay --u
 python scripts/wsesp.py header esp32-c6-lcd-1.47 > board_pins.h
 python scripts/wsesp.py new esp32-s3-touch-lcd-4.3 --framework idf --name hmi --out ./hmi
 python scripts/wsesp.py new esp32-s3-touch-lcd-1.28 --framework idf --with display --name ui   # LCD+touch+LVGL 9
+python scripts/wsesp.py new esp32-c6-lcd-1.47 --framework arduino --with display --name ui     # Arduino_GFX
+python scripts/wsesp.py new esp32-s3-zero --framework idf --with devcontainer --name app        # + VS Code dev container
 python scripts/wsesp.py doctor                       # toolchain + serial ports
 python scripts/wsesp.py ports                        # identify CH343 vs native USB
+python scripts/wsesp.py detect                       # which board is connected?
+python scripts/wsesp.py decode build/app.elf crash.log --board esp32-s3-zero   # backtrace -> file:line
 ```
 
-Add `--json` to `boards`, `show`, `pins`, `doctor` and `ports` for machine-readable output. `pins` exits with 1 when it finds an error.
+`--with display` works for ESP-IDF (SPI and RGB panels) and Arduino (SPI panels); `show` says whether a board is supported and why not.
+
+Add `--json` to `boards`, `show`, `pins`, `doctor`, `ports` and `detect` for machine-readable output. `pins` exits with 1 when it finds an error.
 
 Pin functions: `gpio`, `gpio_in`, `gpio_out`, `adc`, `pwm`, `button`, `interrupt`, `uart_tx`, `uart_rx`, `i2c_sda`, `i2c_scl`, `spi_mosi`, `spi_miso`, `spi_sclk`, `spi_cs`, `i2s_bclk`, `i2s_ws`, `i2s_dout`, `i2s_din`, `i2s_mclk`, `ws2812`, `onewire`, `can_tx`, `can_rx`, `rmt_tx`, `rmt_rx`, `touch`. To add a device on a board's existing I2C bus, use `BUS@0xADDR:label` (for example `i2c@0x3C:oled`).
 

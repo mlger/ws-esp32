@@ -1,0 +1,48 @@
+name: Hardware test report
+description: You ran the generated project on a real board. Tell us what worked.
+labels: ["hardware-test"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Reports like this move a profile to `hardware-tested`. Generate and flash a project first:
+        `python skills/ws-esp32/scripts/wsesp.py new <board> --framework idf --with display --name t`
+  - type: input
+    id: board
+    attributes:
+      label: Board (profile id)
+      placeholder: esp32-s3-touch-lcd-1.28
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Board revision (printed on the PCB, e.g. V1.0)
+  - type: dropdown
+    id: framework
+    attributes:
+      label: Framework
+      options: ["ESP-IDF", "Arduino", "PlatformIO"]
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions (ESP-IDF / Arduino core / LVGL)
+      placeholder: ESP-IDF v5.5.2
+  - type: checkboxes
+    id: results
+    attributes:
+      label: What works
+      options:
+        - label: Starter app boots and prints the right flash and PSRAM size
+        - label: Display shows the demo screen
+        - label: Colors are correct (not inverted, red/blue not swapped)
+        - label: Image is not shifted or mirrored
+        - label: Touch works (the "Tap me" counter goes up)
+        - label: RGB LED blinks
+  - type: textarea
+    id: changes
+    attributes:
+      label: Anything you had to change
+      description: e.g. "set LCD_INVERT to false" or "backlight is active low". Paste the serial log if something failed.

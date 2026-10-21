@@ -1,0 +1,129 @@
+{
+  "$schema": "../board.schema.json",
+  "id": "esp32-s3-eth",
+  "name": "ESP32-S3-ETH",
+  "aliases": [
+    "s3 eth",
+    "w5500",
+    "s3 ethernet"
+  ],
+  "chip": "esp32s3",
+  "soc": "ESP32-S3R8",
+  "flash_mb": 16,
+  "psram_mb": 8,
+  "psram_mode": "octal",
+  "usb": {
+    "native": true,
+    "bridge": null,
+    "console": "usb_serial_jtag"
+  },
+  "verification": {
+    "status": "wiki",
+    "sources": [
+      "https://www.waveshare.com/wiki/ESP32-S3-ETH",
+      "https://files.waveshare.com/wiki/ESP32-S3-ETH/ESP32-S3-ETH-Demo.zip"
+    ],
+    "checked": "2026-10-21",
+    "notes": "Pins from the Waveshare demo sketches (ETH_DHCP, SD_Card, ETH_Web_CAM, RGB_LED)."
+  },
+  "peripherals": [
+    {
+      "id": "eth_spi",
+      "kind": "bus",
+      "protocol": "spi",
+      "pins": {
+        "miso": 12,
+        "mosi": 11,
+        "sclk": 13
+      }
+    },
+    {
+      "id": "eth",
+      "kind": "ethernet",
+      "part": "W5500",
+      "bus": "eth_spi",
+      "pins": {
+        "cs": 14,
+        "rst": 9,
+        "int": 10
+      },
+      "notes": "10/100 Ethernet over SPI. ESP-IDF: esp_eth W5500 driver. Optional PoE module."
+    },
+    {
+      "id": "sd_spi",
+      "kind": "bus",
+      "protocol": "spi",
+      "pins": {
+        "miso": 5,
+        "mosi": 6,
+        "sclk": 7
+      }
+    },
+    {
+      "id": "sd",
+      "kind": "storage",
+      "part": "TF card",
+      "bus": "sd_spi",
+      "pins": {
+        "cs": 4
+      }
+    },
+    {
+      "id": "camera",
+      "kind": "camera",
+      "part": "DVP camera (OV5640/OV2640)",
+      "pins": {
+        "xclk": 3,
+        "siod": 48,
+        "sioc": 47,
+        "y9": 18,
+        "y8": 15,
+        "y7": 38,
+        "y6": 40,
+        "y5": 42,
+        "y4": 46,
+        "y3": 45,
+        "y2": 41,
+        "vsync": 1,
+        "href": 2,
+        "pclk": 39,
+        "enable": 8
+      },
+      "notes": "No PWDN/RESET lines. The demo drives CAM_ENABLE (GPIO8) low at startup."
+    },
+    {
+      "id": "rgb_led",
+      "kind": "led",
+      "part": "WS2812",
+      "pins": {
+        "data": 21
+      }
+    },
+    {
+      "id": "boot_button",
+      "kind": "button",
+      "pins": {
+        "io": 0
+      },
+      "soft": true
+    },
+    {
+      "id": "usb",
+      "kind": "usb",
+      "pins": {
+        "dm": 19,
+        "dp": 20
+      }
+    }
+  ],
+  "free_pins": null,
+  "software": {
+    "arduino_core": null,
+    "lvgl": null,
+    "esp_idf": null
+  },
+  "warnings": [
+    "The wiki's GPIO test sketch toggles GPIO33-37, but on the ESP32-S3R8 those are used by octal PSRAM. Don't use them.",
+    "GPIO45/46 (strapping pins) are camera data lines. Leave the camera disconnected if the board won't boot."
+  ]
+}

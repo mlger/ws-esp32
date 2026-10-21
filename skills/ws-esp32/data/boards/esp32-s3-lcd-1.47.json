@@ -1,4 +1,5 @@
 {
+  "$schema": "../board.schema.json",
   "id": "esp32-s3-lcd-1.47",
   "name": "ESP32-S3-LCD-1.47",
   "aliases": ["s3 1.47", "s3 lcd stick"],

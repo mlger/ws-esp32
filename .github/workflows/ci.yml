@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m pip install pytest
+      - run: python -m pip install pytest jsonschema
       - name: Validate board profiles
         run: python skills/ws-esp32/scripts/wsesp.py validate-data
       - name: Unit tests

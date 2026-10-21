@@ -30,7 +30,7 @@ Always get the **full serial log from reset** (`idf.py monitor`, then press RESE
 
 `Guru Meditation Error: Core 0 panic'ed (LoadProhibited)` usually means a NULL or invalid pointer. `StoreProhibited` is a write through a bad pointer. `InstrFetchProhibited` is a bad function pointer or a corrupted stack.
 
-The first `Backtrace:` addresses decoded with addr2line (or seen in `idf.py monitor`) give the file and line. Read the code at that line before suggesting a fix.
+Decode the backtrace to get the file and line. `idf.py monitor` does this by itself. For a saved log, run `python scripts/wsesp.py decode build/<app>.elf crash.log --board <id>`, which finds the right addr2line for the chip. Read the code at that line before suggesting a fix.
 
 ## Arduino-specific
 

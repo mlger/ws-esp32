@@ -1,0 +1,72 @@
+{
+  "$schema": "../board.schema.json",
+  "id": "esp32-c3-zero",
+  "name": "ESP32-C3-Zero",
+  "aliases": [
+    "c3 zero",
+    "c3 mini"
+  ],
+  "chip": "esp32c3",
+  "soc": "ESP32-C3FH4",
+  "flash_mb": 4,
+  "psram_mb": 0,
+  "psram_mode": "none",
+  "usb": {
+    "native": true,
+    "bridge": null,
+    "console": "usb_serial_jtag"
+  },
+  "verification": {
+    "status": "wiki",
+    "sources": [
+      "https://www.waveshare.com/wiki/ESP32-C3-Zero",
+      "https://github.com/waveshareteam/ESP32-C3-Zero-Basic-Kit/blob/main/ESP-IDF/07-Peripheral/rmt_ws2812/main/main.c"
+    ],
+    "checked": "2026-10-21",
+    "notes": "WS2812 on GPIO10 and BOOT on GPIO9 per the wiki. Header pin list is only in the wiki image."
+  },
+  "peripherals": [
+    {
+      "id": "rgb_led",
+      "kind": "led",
+      "part": "WS2812",
+      "pins": {
+        "data": 10
+      }
+    },
+    {
+      "id": "boot_button",
+      "kind": "button",
+      "pins": {
+        "io": 9
+      },
+      "soft": true
+    },
+    {
+      "id": "usb",
+      "kind": "usb",
+      "pins": {
+        "dm": 18,
+        "dp": 19
+      }
+    }
+  ],
+  "free_pins": null,
+  "not_exposed": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "software": {
+    "arduino_core": null,
+    "lvgl": null,
+    "esp_idf": null
+  },
+  "warnings": [
+    "No USB-UART chip: enable USB CDC On Boot in Arduino, or Serial prints nothing.",
+    "Keep the ceramic antenna clear of PCBs, metal and plastic."
+  ]
+}

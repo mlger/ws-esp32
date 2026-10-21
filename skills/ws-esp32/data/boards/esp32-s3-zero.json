@@ -1,4 +1,5 @@
 {
+  "$schema": "../board.schema.json",
   "id": "esp32-s3-zero",
   "name": "ESP32-S3-Zero",
   "aliases": ["s3 zero", "s3 mini"],

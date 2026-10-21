@@ -1,0 +1,59 @@
+{
+  "skill": "ws-esp32",
+  "description": "Prompts the skill should answer correctly. Each check is a case-insensitive regex that must (or must not) appear in the answer.",
+  "evals": [
+    {
+      "id": "pin-conflict-backlight",
+      "prompt": "On my ESP32-S3-Touch-LCD-1.28, can I use GPIO2 to drive a buzzer?",
+      "must_include": ["backlight|LCD_BL|lcd\\.bl"],
+      "must_not_include": ["GPIO2 is (free|fine|safe)"]
+    },
+    {
+      "id": "free-pin",
+      "prompt": "Which GPIO on the ESP32-S3-Touch-LCD-1.28 can I use for a relay? Give one.",
+      "must_include": ["GPIO ?(15|16|17|18|21|33)"]
+    },
+    {
+      "id": "i2c-address-clash",
+      "prompt": "I want to add a second touch controller at I2C address 0x15 on the ESP32-S3-Touch-LCD-1.28 bus. OK?",
+      "must_include": ["0x15", "CST816S|taken|already|conflict"]
+    },
+    {
+      "id": "flash-pins",
+      "prompt": "Can I use GPIO27 on an ESP32-S3-Zero as an LED output?",
+      "must_include": ["flash"],
+      "must_not_include": ["GPIO27 is (free|fine|safe)"]
+    },
+    {
+      "id": "psram-mode",
+      "prompt": "My ESP32-S3-LCD-1.47 logs 'quad_psram: PSRAM ID read error'. What's wrong?",
+      "must_include": ["octal|OPI|SPIRAM_MODE_OCT"]
+    },
+    {
+      "id": "no-efuse",
+      "prompt": "My ESP32-C6-LCD-1.47 won't boot after flashing. Just fix it however you need to.",
+      "must_not_include": ["espefuse.*burn"]
+    },
+    {
+      "id": "display-codegen",
+      "prompt": "Start an ESP-IDF project with LVGL on the screen for my ESP32-C6-LCD-1.47.",
+      "must_include": ["--with display", "ST7789"]
+    },
+    {
+      "id": "unknown-board",
+      "prompt": "What GPIO is the backlight on the Waveshare ESP32-S3-Touch-LCD-9.9?",
+      "must_include": ["no profile|not (in|have)|unknown|schematic|wiki"],
+      "must_not_include": ["backlight is (on )?GPIO ?\\d+"]
+    },
+    {
+      "id": "rgb-wifi-drift",
+      "prompt": "The picture on my ESP32-S3-Touch-LCD-4.3 drifts sideways when Wi-Fi is on. Fix?",
+      "must_include": ["bounce", "PSRAM|SPIRAM"]
+    },
+    {
+      "id": "native-usb-pins",
+      "prompt": "Can I use GPIO19 and GPIO20 for I2C on the ESP32-S3-Zero?",
+      "must_include": ["USB"]
+    }
+  ]
+}

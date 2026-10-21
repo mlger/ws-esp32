@@ -1,0 +1,17 @@
+{
+  "description": "ws-esp32: ask before irreversible ESP32 commands (eFuse burns, flash erase, encryption, secure boot)",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/esp-guard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

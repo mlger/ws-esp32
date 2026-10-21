@@ -2,7 +2,7 @@
 
 ## Find the port
 
-Run `python scripts/wsesp.py ports`. It identifies native USB (`303A:1001`) and CH343 (`1A86:55D3`) ports. Boards with two USB-C ports (such as the 4.3") show up twice when both are connected. Flash through the one the profile lists as `console`.
+Run `python scripts/wsesp.py ports`. To confirm which board is connected, run `wsesp.py detect`: it reads the chip, flash and PSRAM with esptool (this resets the board) and lists the matching profiles. It identifies native USB (`303A:1001`) and CH343 (`1A86:55D3`) ports. Boards with two USB-C ports (such as the 4.3") show up twice when both are connected. Flash through the one the profile lists as `console`.
 
 ## Commands
 
@@ -43,7 +43,7 @@ esptool v5 uses dashed command names (`merge-bin`, `write-flash`). The old under
 
 - `idf.py monitor` decodes backtraces by itself. Keep using it during development.
 - PlatformIO: `monitor_filters = esp32_exception_decoder` (already set in generated projects).
-- Arduino CLI or a raw log: run `xtensa-esp32s3-elf-addr2line -pfiaC -e build/<app>.elf 0x4200abcd 0x...` (RISC-V chips: `riscv32-esp-elf-addr2line`).
+- Arduino CLI or a raw log: `python scripts/wsesp.py decode build/<app>.elf crash.log --board <id>`. It picks `xtensa-esp32s3-elf-addr2line` or `riscv32-esp-elf-addr2line` for you. Run it from an ESP-IDF terminal so the toolchain is on PATH.
 
 ## Erasing
 

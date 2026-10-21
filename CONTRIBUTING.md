@@ -2,7 +2,7 @@
 
 Thanks for helping. The most useful contributions are, in order:
 
-1. **Hardware test reports.** Flash the starter project on your board and confirm the display, touch and LED work. Then raise the profile to `hardware-tested` and note the board revision.
+1. **Hardware test reports.** Flash the generated project on your board and fill in the [hardware test report](https://github.com/mlger/ws-esp32/issues/new?template=hardware-test.yml). Confirmed boards move to `hardware-tested`.
 2. **Filling in `partial` profiles** from the schematic or demo source.
 3. **New board profiles.** Follow [add-board.md](skills/ws-esp32/references/workflows/add-board.md).
 4. Fixes to workflows, templates and the CLI.
@@ -17,10 +17,13 @@ Thanks for helping. The most useful contributions are, in order:
 
 ```bash
 git clone https://github.com/mlger/ws-esp32 && cd ws-esp32
-python -m pip install pytest
+python -m pip install pytest jsonschema pre-commit
+pre-commit install
 python -m pytest
 python skills/ws-esp32/scripts/wsesp.py validate-data
 ```
+
+The VS Code dev container (`.devcontainer/`) has all of this plus ESP-IDF. Board files get autocomplete from `skills/ws-esp32/data/board.schema.json`.
 
 For template or profile changes, also build the generated project locally if you can:
 
