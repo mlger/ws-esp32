@@ -1,0 +1,148 @@
+{
+  "$schema": "../board.schema.json",
+  "id": "esp32-p4-nano",
+  "name": "ESP32-P4-NANO",
+  "aliases": [
+    "p4 nano",
+    "p4-nano",
+    "esp32 p4 nano"
+  ],
+  "chip": "esp32p4",
+  "chip_revision": "v1",
+  "soc": "ESP32-P4NRW32",
+  "flash_mb": 16,
+  "psram_mb": 32,
+  "psram_mode": "hex",
+  "usb": {
+    "native": false,
+    "bridge": "CH343P",
+    "console": "uart0",
+    "notes": "The Type-C port goes through a CH343P to UART0 (GPIO37/38). The Type-A port is USB 2.0 High-Speed OTG on dedicated pads, not GPIOs."
+  },
+  "verification": {
+    "status": "partial",
+    "sources": [
+      "https://www.waveshare.com/wiki/ESP32-P4-Nano-StartPage",
+      "https://files.waveshare.com/wiki/ESP32-P4-NANO/ESP32-P4-NANO-schematic.pdf",
+      "https://files.waveshare.com/wiki/ESP32-P4-NANO/ESP32-P4-NANO_Demo.zip",
+      "https://www.espressif.com/sites/default/files/documentation/esp32-p4_datasheet_en.pdf"
+    ],
+    "checked": "2026-10-21",
+    "notes": "I2C, Ethernet, SD and audio pins from the wiki's ESP-IDF sections. Wi-Fi coprocessor SDIO pins from the demo's 08_eth2ap sdkconfig. CH343P on GPIO37/38 from the schematic. The old /wiki/ESP32-P4-Nano URL returns 404. BOOT on GPIO35 comes from the datasheet (GPIO35 is the download-mode strap). Chip revision v1 from the wiki FAQ (ECO1 chip)."
+  },
+  "peripherals": [
+    {
+      "id": "i2c",
+      "kind": "bus",
+      "protocol": "i2c",
+      "pins": {
+        "sda": 7,
+        "scl": 8
+      }
+    },
+    {
+      "id": "codec",
+      "kind": "codec",
+      "part": "ES8311",
+      "bus": "i2c",
+      "addr": "0x18",
+      "addr_verified": false,
+      "interface": "i2s",
+      "pins": {
+        "mclk": 13,
+        "sclk": 12,
+        "lrck": 10,
+        "dout": 9,
+        "din": 11
+      },
+      "notes": "dout = P4 to codec DSDIN, din = codec ASDOUT to P4.",
+      "idf_components": ["espressif/es8311"]
+    },
+    {
+      "id": "speaker_amp",
+      "kind": "codec",
+      "part": "NS4150B",
+      "pins": {
+        "en": 53
+      },
+      "notes": "Power amplifier enable, active high. Speaker on an MX1.25 2P connector."
+    },
+    {
+      "id": "sd",
+      "kind": "storage",
+      "part": "TF card (SDMMC 4-bit)",
+      "interface": "sdmmc",
+      "pins": {
+        "clk": 43,
+        "cmd": 44,
+        "d0": 39,
+        "d1": 40,
+        "d2": 41,
+        "d3": 42,
+        "pwr": null
+      },
+      "notes": "The demo powers the card IO from an on-chip LDO channel (sd_pwr_ctrl). Which channel, and whether a GPIO switches card power, is not documented."
+    },
+    {
+      "id": "eth",
+      "kind": "ethernet",
+      "part": "IP101GRI",
+      "interface": "rmii",
+      "pins": {
+        "txd0": 34,
+        "txd1": 35,
+        "tx_en": 49,
+        "rxd0": 29,
+        "rxd1": 30,
+        "crs_dv": 28,
+        "ref_clk": 50,
+        "mdc": 31,
+        "mdio": 52,
+        "rst": 51
+      },
+      "share": "gpio35_boot",
+      "notes": "Internal EMAC over RMII, PHY address 1 (demo Kconfig). REF_CLK is a 50 MHz clock from the PHY. Optional PoE module."
+    },
+    {
+      "id": "wifi",
+      "kind": "wireless",
+      "part": "ESP32-C6-MINI-1",
+      "interface": "sdio",
+      "pins": {
+        "clk": 18,
+        "cmd": 19,
+        "d0": 14,
+        "d1": 15,
+        "d2": 16,
+        "d3": 17,
+        "rst": 54
+      },
+      "notes": "Wi-Fi 6 / Bluetooth 5 coprocessor. Use esp_wifi_remote + esp_hosted (SDIO host). rst drives the C6 enable.",
+      "idf_components": ["espressif/esp_wifi_remote", "espressif/esp_hosted"]
+    },
+    {
+      "id": "boot_button",
+      "kind": "button",
+      "pins": {
+        "io": 35
+      },
+      "soft": true,
+      "share": "gpio35_boot"
+    }
+  ],
+  "free_pins": null,
+  "software": {
+    "arduino_core": null,
+    "lvgl": null,
+    "esp_idf": null
+  },
+  "warnings": [
+    "Chip revision matters: the wiki FAQ says this board ships with an ECO1 (v1.x) chip, so the profile builds for revision < 3.0. Check with `wsesp.py detect`. If esptool reports v3.x, set chip_revision to v3. Firmware for one does not boot on the other.",
+    "GPIO35 is both the BOOT button and Ethernet RMII TXD1. Don't hold BOOT while Ethernet is running, and don't attach anything that pulls GPIO35 low at reset.",
+    "GPIO34 (RMII TXD0) and GPIO35 are strapping pins used by Ethernet. GPIO36-38 are also strapping pins (37/38 are UART0).",
+    "The wiki lists the RMII data lines as 'TXD[1:0]: GPIO34 and GPIO35' and 'RXD[1:0]: GPIO30 and GPIO29', which reads as TXD1=34. The ESP32-P4 IO MUX table has GPIO34=TXD0 and GPIO35=TXD1. The profile follows the datasheet.",
+    "Wiki FAQ: on the ECO1 chip the ADC is not calibrated (readings are unreliable) and USB Serial/JTAG (GPIO24/25) is not supported.",
+    "The schematic shows a GPIO45 net near the microSD section, and the newer ESP32-P4-NANO-WIFI6-DB uses GPIO45 as SD power enable, but the NANO docs don't say what GPIO45 does here. Leave it alone until confirmed.",
+    "The header pinout is only published as an image on the wiki, so free_pins is not filled in."
+  ]
+}

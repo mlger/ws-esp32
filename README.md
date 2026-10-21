@@ -31,6 +31,8 @@ An agent skill that helps AI coding agents (Claude Code, Claude.ai, Codex, Curso
 | ESP32-C6-LCD-1.47 | ESP32-C6 | 4 MB / - | IDF + Arduino (ST7789) | wiki |
 | ESP32-C6-Zero | ESP32-C6 | 4 MB / - | - | wiki |
 | ESP32-C3-Zero | ESP32-C3 | 4 MB / - | - | wiki |
+| ESP32-P4-NANO | ESP32-P4 (v1.x) | 16 MB / 32 MB | - | partial |
+| ESP32-P4-NANO-WIFI6-DB | ESP32-P4 (v3.x) | 16 MB / 32 MB | - | wiki |
 
 **Data levels:** `partial` means some pins are still unknown. `wiki` means all pins come from Waveshare's docs or demo code. `schematic` means checked against the schematic. `hardware-tested` means confirmed on a real board. No board is `hardware-tested` yet, so if you own one, please [send a test report](https://github.com/mlger/ws-esp32/issues/new?template=hardware-test.yml).
 

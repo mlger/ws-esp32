@@ -1,6 +1,6 @@
 ---
 name: ws-esp32
-description: Build, flash and debug firmware for Waveshare ESP32 development boards (ESP32-S3/C6/C3 boards with LCD, AMOLED, touch, IMU, SD, RGB LED). Use when the user mentions a Waveshare board, asks for board pinouts, wants to start an ESP-IDF / Arduino / PlatformIO project for one, bring up its display or touch with LVGL, check whether a GPIO is safe to use, set up an ESP32 toolchain, or fix flashing, boot-loop and serial-port problems.
+description: Build, flash and debug firmware for Waveshare ESP32 development boards (ESP32-S3/C6/C3/P4 boards with LCD, AMOLED, touch, IMU, SD, Ethernet, RGB LED). Use when the user mentions a Waveshare board, asks for board pinouts, wants to start an ESP-IDF / Arduino / PlatformIO project for one, bring up its display or touch with LVGL, check whether a GPIO is safe to use, set up an ESP32 toolchain, or fix flashing, boot-loop and serial-port problems.
 ---
 
 # Waveshare ESP32
