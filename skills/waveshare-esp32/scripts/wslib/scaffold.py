@@ -205,6 +205,7 @@ def write_project(files: Dict[str, str], out_dir: Path, force: bool = False) -> 
     for rel, content in files.items():
         path = out_dir / rel
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content, encoding="utf-8", newline="\n")
+        with open(path, "w", encoding="utf-8", newline="\n") as f:  # Path.write_text(newline=) needs 3.10
+            f.write(content)
         written.append(path)
     return written
