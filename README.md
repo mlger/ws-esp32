@@ -1,4 +1,4 @@
-# Waveshare ESP32 Agent Skill
+# ws-esp32: Waveshare ESP32 Agent Skill
 
 An agent skill that helps AI coding agents (Claude Code, Claude.ai, Codex, Cursor and others) write firmware for **Waveshare ESP32 boards** without guessing pin numbers.
 
@@ -28,25 +28,25 @@ An agent skill that helps AI coding agents (Claude Code, Claude.ai, Codex, Curso
 ### Claude Code (plugin)
 
 ```text
-/plugin marketplace add mlger/waveshare-esp32-skill
-/plugin install waveshare-esp32@waveshare-esp32-skill
+/plugin marketplace add mlger/ws-esp32
+/plugin install ws-esp32@ws-esp32
 ```
 
 ### Claude Code (skill folder only)
 
 ```bash
-git clone https://github.com/mlger/waveshare-esp32-skill
-cp -r waveshare-esp32-skill/skills/waveshare-esp32 ~/.claude/skills/        # all projects
+git clone https://github.com/mlger/ws-esp32
+cp -r ws-esp32/skills/ws-esp32 ~/.claude/skills/        # all projects
 # or: cp -r ... <your-project>/.claude/skills/                               # one project
 ```
 
 ### Claude.ai / Claude Desktop
 
-Download `waveshare-esp32-<version>.zip` from [Releases](../../releases) and upload it under Settings > Capabilities > Skills.
+Download `ws-esp32-<version>.zip` from [Releases](../../releases) and upload it under Settings > Capabilities > Skills.
 
 ### Other agents (Codex, Cursor, Gemini CLI, Copilot)
 
-Copy `skills/waveshare-esp32/` into your project and point the agent at it from `AGENTS.md` (or `.cursor/rules`). See [AGENTS.md](AGENTS.md) in this repo for an example.
+Copy `skills/ws-esp32/` into your project and point the agent at it from `AGENTS.md` (or `.cursor/rules`). See [AGENTS.md](AGENTS.md) in this repo for an example.
 
 ## Use
 
@@ -60,7 +60,7 @@ Ask in plain language. The skill loads when you mention a Waveshare board or ESP
 The CLI also works on its own:
 
 ```bash
-cd skills/waveshare-esp32
+cd skills/ws-esp32
 python scripts/wsesp.py boards
 python scripts/wsesp.py show 1.28
 python scripts/wsesp.py pins esp32-s3-touch-lcd-1.28 --use 16=gpio_out:relay --use i2c@0x3C:oled
@@ -81,7 +81,7 @@ OK    [oled] 0x3C is free on i2c (SDA=6, SCL=7)
 
 ```text
 .claude-plugin/            plugin + marketplace manifests
-skills/waveshare-esp32/
+skills/ws-esp32/
   SKILL.md                 entry point the agent reads first
   data/chips.json          chip GPIO rules
   data/boards/*.json       board profiles
@@ -98,7 +98,7 @@ tools/                     CI helpers and release packaging
 ```bash
 python -m pip install pytest
 python -m pytest
-python skills/waveshare-esp32/scripts/wsesp.py validate-data
+python skills/ws-esp32/scripts/wsesp.py validate-data
 ```
 
 On every push, CI generates a starter project for **every board** and compiles it with ESP-IDF and Arduino-ESP32, so a broken profile or template fails the build.

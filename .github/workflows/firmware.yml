@@ -8,68 +8,92 @@ on:
     paths: ["skills/**", "tools/**", ".github/workflows/firmware.yml"]
   pull_request:
     paths: ["skills/**", "tools/**", ".github/workflows/firmware.yml"]
+  schedule:
+    - cron: "0 3 * * 1" # weekly: catch breakage from new ESP-IDF / Arduino releases
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: firmware-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ESP_IDF_VERSION: v5.5.2
+  ESP32_INDEX: https://espressif.github.io/arduino-esp32/package_esp32_index.json
+
 jobs:
   matrix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     outputs:
       matrix: ${{ steps.m.outputs.matrix }}
       display_matrix: ${{ steps.m.outputs.display_matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: m
-        run: python tools/ci_matrix.py >> "$GITHUB_OUTPUT"
+        run: python3 tools/ci_matrix.py >> "$GITHUB_OUTPUT"
 
   esp-idf:
     needs: matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Generate project
-        run: python skills/waveshare-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework idf --name ci_app --out ci/${{ matrix.board }}
+        run: python3 skills/ws-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework idf --name ci_app --out ci/${{ matrix.board }}
       - uses: espressif/esp-idf-ci-action@v1
         with:
-          esp_idf_version: v5.5.2
+          esp_idf_version: ${{ env.ESP_IDF_VERSION }}
           target: ${{ matrix.target }}
           path: ci/${{ matrix.board }}
 
   esp-idf-display:
     needs: matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.matrix.outputs.display_matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Generate project with display + LVGL
-        run: python skills/waveshare-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework idf --with display --name ci_ui --out ci/${{ matrix.board }}
+        run: python3 skills/ws-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework idf --with display --name ci_ui --out ci/${{ matrix.board }}
       - uses: espressif/esp-idf-ci-action@v1
         with:
-          esp_idf_version: v5.5.2
+          esp_idf_version: ${{ env.ESP_IDF_VERSION }}
           target: ${{ matrix.target }}
           path: ci/${{ matrix.board }}
 
   arduino:
     needs: matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: arduino/setup-arduino-cli@v2
+      - uses: actions/checkout@v7
+      # Official install script (arduino/setup-arduino-cli still runs on deprecated Node 20).
+      - name: Install arduino-cli
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$HOME/.local/bin" sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.arduino15
+          key: arduino15-esp32-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: arduino15-esp32-${{ runner.os }}-
       - name: Install esp32 core
         run: |
-          arduino-cli core update-index --additional-urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
-          arduino-cli core install esp32:esp32 --additional-urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index --additional-urls "$ESP32_INDEX"
+          arduino-cli core install esp32:esp32 --additional-urls "$ESP32_INDEX"
       - name: Generate and compile sketch
         run: |
-          python skills/waveshare-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework arduino --name ci_app --out ci/${{ matrix.board }}
+          python3 skills/ws-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework arduino --name ci_app --out ci/${{ matrix.board }}
           arduino-cli compile ci/${{ matrix.board }}/ci_app

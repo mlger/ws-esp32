@@ -25,5 +25,5 @@ body:
     id: env
     attributes:
       label: Environment
-      description: Output of `python skills/waveshare-esp32/scripts/wsesp.py doctor`
+      description: Output of `python skills/ws-esp32/scripts/wsesp.py doctor`
       render: text

@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ROOT / "skills" / "waveshare-esp32" / "scripts"
+SCRIPTS = ROOT / "skills" / "ws-esp32" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 from wslib.data import load_boards, load_chips  # noqa: E402

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""wsesp - command line helper for the waveshare-esp32 agent skill.
+"""wsesp - command line helper for the ws-esp32 agent skill.
 
 Examples:
   python wsesp.py boards

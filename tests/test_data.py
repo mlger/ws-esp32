@@ -75,17 +75,17 @@ def test_versions_in_sync():
 
 
 def test_skill_frontmatter():
-    text = (ROOT / "skills" / "waveshare-esp32" / "SKILL.md").read_text(encoding="utf-8")
+    text = (ROOT / "skills" / "ws-esp32" / "SKILL.md").read_text(encoding="utf-8")
     m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
     assert m, "SKILL.md needs YAML frontmatter"
     fm = dict(line.split(": ", 1) for line in m.group(1).splitlines() if ": " in line)
-    assert fm["name"] == "waveshare-esp32"
+    assert fm["name"] == "ws-esp32"
     assert 50 < len(fm["description"]) <= 1024
     assert len(text.splitlines()) < 500
 
 
 def test_referenced_files_exist():
-    skill = ROOT / "skills" / "waveshare-esp32"
+    skill = ROOT / "skills" / "ws-esp32"
     text = (skill / "SKILL.md").read_text(encoding="utf-8")
     for rel in set(re.findall(r"`(references/[\w/.-]+\.md)`", text)):
         assert (skill / rel).exists(), rel

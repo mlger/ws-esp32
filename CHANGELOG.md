@@ -13,7 +13,7 @@ All notable changes to this project are documented here. The format follows [Kee
 ## [0.1.0] - 2026-10-21
 
 ### Added
-- `waveshare-esp32` skill with workflows for setup, new projects, build/flash/monitor, display bring-up, troubleshooting and adding boards.
+- `ws-esp32` skill with workflows for setup, new projects, build/flash/monitor, display bring-up, troubleshooting and adding boards.
 - Board profiles: ESP32-S3-Touch-LCD-1.28, ESP32-S3-Touch-LCD-4.3, ESP32-S3-LCD-1.47, ESP32-S3-Touch-AMOLED-1.8 (partial), ESP32-S3-Zero, ESP32-C6-LCD-1.47, ESP32-C6-Zero (partial).
 - Chip rules for ESP32, ESP32-S3, ESP32-C3, ESP32-C6.
 - `wsesp.py` CLI: `boards`, `show`, `pins`, `header`, `new`, `doctor`, `ports`, `validate-data`.

@@ -4,7 +4,7 @@ Thanks for helping. The most useful contributions are, in order:
 
 1. **Hardware test reports.** Flash the starter project on your board and confirm the display, touch and LED work. Then raise the profile to `hardware-tested` and note the board revision.
 2. **Filling in `partial` profiles** from the schematic or demo source.
-3. **New board profiles.** Follow [add-board.md](skills/waveshare-esp32/references/workflows/add-board.md).
+3. **New board profiles.** Follow [add-board.md](skills/ws-esp32/references/workflows/add-board.md).
 4. Fixes to workflows, templates and the CLI.
 
 ## Ground rules for board data
@@ -16,16 +16,16 @@ Thanks for helping. The most useful contributions are, in order:
 ## Workflow
 
 ```bash
-git clone https://github.com/mlger/waveshare-esp32-skill && cd waveshare-esp32-skill
+git clone https://github.com/mlger/ws-esp32 && cd ws-esp32
 python -m pip install pytest
 python -m pytest
-python skills/waveshare-esp32/scripts/wsesp.py validate-data
+python skills/ws-esp32/scripts/wsesp.py validate-data
 ```
 
 For template or profile changes, also build the generated project locally if you can:
 
 ```bash
-python skills/waveshare-esp32/scripts/wsesp.py new <board> --framework idf --name t --out /tmp/t
+python skills/ws-esp32/scripts/wsesp.py new <board> --framework idf --name t --out /tmp/t
 cd /tmp/t && idf.py build
 ```
 

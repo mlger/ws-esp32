@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills" / "waveshare-esp32" / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills" / "ws-esp32" / "scripts"))
 
 from wslib.data import load_boards, load_chips  # noqa: E402
 from wslib.display import display_support  # noqa: E402
