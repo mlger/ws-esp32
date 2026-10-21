@@ -53,6 +53,11 @@ def find_board(query: str, boards: Optional[Dict[str, Dict[str, Any]]] = None
             return b, [b["id"]]
     hits = [b["id"] for b in boards.values()
             if any(q in _norm(n) for n in [b["id"], b["name"]] + b.get("aliases", []))]
+    if len(hits) > 1:
+        # "7" or "2.8": prefer boards whose name ends with the query (so "2.8" doesn't hit "1.28").
+        tail = [h for h in hits if _norm(h.rsplit("-", 1)[-1]) == q]
+        if tail:
+            hits = tail
     if len(hits) == 1:
         return boards[hits[0]], hits
     return None, hits

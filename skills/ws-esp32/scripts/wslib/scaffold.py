@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .data import TEMPLATES_DIR
-from .display import display_dependencies, render_display
+from .display import display_dependencies, display_sdkconfig, render_arduino_display, render_display
 
 FRAMEWORKS = ("idf", "arduino", "pio")
 PIO_PLATFORM = ("https://github.com/pioarduino/platform-espressif32/releases/download/"
@@ -128,6 +128,26 @@ def platformio_ini(board: Dict[str, Any], chip: Dict[str, Any], name: str) -> st
     return "\n".join(lines) + "\n"
 
 
+def devcontainer_json(board: Dict[str, Any], framework: str) -> str:
+    """Dev container for a generated project. Flash from the host: USB passthrough
+    only works reliably on Linux hosts."""
+    import json
+    if framework == "idf":
+        idf = (board.get("software") or {}).get("esp_idf") or "5.5.2"
+        cfg = {"name": board["name"], "image": f"espressif/idf:v{idf}",
+               "customizations": {"vscode": {"extensions": ["espressif.esp-idf-extension"]}}}
+    else:
+        setup = ("python3 -m pip install -U platformio" if framework == "pio" else
+                 "curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh"
+                 " | BINDIR=/usr/local/bin sh && arduino-cli core install esp32:esp32 --additional-urls "
+                 "https://espressif.github.io/arduino-esp32/package_esp32_index.json")
+        cfg = {"name": board["name"], "image": "mcr.microsoft.com/devcontainers/python:3.12",
+               "postCreateCommand": setup}
+    cfg["runArgs"] = []
+    cfg["//"] = "Linux hosts: add \"--device=/dev/ttyACM0\" to runArgs to flash from inside the container."
+    return json.dumps(cfg, indent=2) + "\n"
+
+
 def _fill(template: str, values: Dict[str, str]) -> str:
     for k, v in values.items():
         template = template.replace("{{" + k + "}}", v)
@@ -139,7 +159,7 @@ def _tmpl(rel: str) -> str:
 
 
 def plan_project(board: Dict[str, Any], chip: Dict[str, Any], framework: str, name: str,
-                 with_display: bool = False) -> Dict[str, str]:
+                 with_display: bool = False, devcontainer: bool = False) -> Dict[str, str]:
     """Return {relative path: file content} for a new project.
 
     with_display adds LCD/touch/LVGL code (ESP-IDF only). Raises UnsupportedDisplay
@@ -147,8 +167,8 @@ def plan_project(board: Dict[str, Any], chip: Dict[str, Any], framework: str, na
     """
     if framework not in FRAMEWORKS:
         raise ValueError(f"framework must be one of {FRAMEWORKS}")
-    if with_display and framework != "idf":
-        raise ValueError("--with display is only available for --framework idf for now")
+    if with_display and framework == "pio":
+        raise ValueError("--with display is available for --framework idf and arduino")
     if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_\-]*", name):
         raise ValueError("project name must start with a letter and use letters, digits, '_' or '-'")
     values = {
@@ -172,14 +192,17 @@ def plan_project(board: Dict[str, Any], chip: Dict[str, Any], framework: str, na
             "main/idf_component.yml": idf_component_yml(
                 board, display_dependencies(board) if with_display else None),
             "main/board_pins.h": header,
-            "sdkconfig.defaults": sdkconfig_defaults(board, chip),
+            "sdkconfig.defaults": sdkconfig_defaults(board, chip)
+            + "".join(line + "\n" for line in (display_sdkconfig(board) if with_display else [])),
             "README.md": _fill(_tmpl("idf/README.md.tmpl"), values),
         })
         if with_display:
-            files.update(render_display(board, _tmpl("idf/display.c.tmpl")))
+            files.update(render_display(board, {"spi": _tmpl("idf/display.c.tmpl"),
+                                                 "rgb": _tmpl("idf/display_rgb.c.tmpl")}))
     elif framework == "arduino":
         files.update({
-            f"{name}.ino": _fill(_tmpl("arduino/app.cpp.tmpl"), values),
+            f"{name}.ino": _fill(render_arduino_display(board, _tmpl("arduino/app_display.cpp.tmpl"))
+                                 if with_display else _tmpl("arduino/app.cpp.tmpl"), values),
             "board_pins.h": header,
             "sketch.yaml": f"default_fqbn: {values['FQBN']}\n",
             "README.md": _fill(_tmpl("arduino/README.md.tmpl"), values),
@@ -193,6 +216,9 @@ def plan_project(board: Dict[str, Any], chip: Dict[str, Any], framework: str, na
             "include/board_pins.h": header,
             "README.md": _fill(_tmpl("pio/README.md.tmpl"), values),
         })
+    if devcontainer:
+        prefix = f"{name}/" if framework == "arduino" else ""
+        files[f"{prefix}.devcontainer/devcontainer.json"] = devcontainer_json(board, framework)
     return files
 
 
