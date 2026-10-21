@@ -1,0 +1,15 @@
+{
+  "name": "ws-esp32 (contributors)",
+  "image": "espressif/idf:v5.5.2",
+  "postCreateCommand": "python3 -m pip install --break-system-packages pytest ruff jsonschema pre-commit && pre-commit install",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "charliermarsh.ruff", "espressif.esp-idf-extension", "redhat.vscode-yaml"],
+      "settings": {
+        "json.schemas": [
+          {"fileMatch": ["skills/ws-esp32/data/boards/*.json"], "url": "./skills/ws-esp32/data/board.schema.json"}
+        ]
+      }
+    }
+  }
+}

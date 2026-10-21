@@ -1,7 +1,7 @@
 name: Firmware builds
 
-# Generate a starter project for every board profile and compile it,
-# so a broken profile or template fails CI.
+# Generate a project for every board profile and compile it, so a broken
+# profile or template fails CI.
 on:
   push:
     branches: [main]
@@ -19,40 +19,42 @@ concurrency:
   group: firmware-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  ESP_IDF_VERSION: v5.5.2
-  ESP32_INDEX: https://espressif.github.io/arduino-esp32/package_esp32_index.json
-
 jobs:
   matrix:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
       matrix: ${{ steps.m.outputs.matrix }}
+      idf_matrix: ${{ steps.m.outputs.idf_matrix }}
       display_matrix: ${{ steps.m.outputs.display_matrix }}
+      arduino_display: ${{ steps.m.outputs.arduino_display }}
     steps:
       - uses: actions/checkout@v7
       - id: m
         run: python3 tools/ci_matrix.py >> "$GITHUB_OUTPUT"
 
   esp-idf:
+    name: esp-idf (${{ matrix.board }}, ${{ matrix.idf }})
     needs: matrix
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    # "latest" is an early warning only; it must not block merges.
+    continue-on-error: ${{ matrix.idf == 'latest' }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.matrix.outputs.idf_matrix) }}
     steps:
       - uses: actions/checkout@v7
       - name: Generate project
         run: python3 skills/ws-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework idf --name ci_app --out ci/${{ matrix.board }}
       - uses: espressif/esp-idf-ci-action@v1
         with:
-          esp_idf_version: ${{ env.ESP_IDF_VERSION }}
+          esp_idf_version: ${{ matrix.idf }}
           target: ${{ matrix.target }}
           path: ci/${{ matrix.board }}
 
   esp-idf-display:
+    name: esp-idf display (${{ matrix.board }})
     needs: matrix
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -65,11 +67,12 @@ jobs:
         run: python3 skills/ws-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework idf --with display --name ci_ui --out ci/${{ matrix.board }}
       - uses: espressif/esp-idf-ci-action@v1
         with:
-          esp_idf_version: ${{ env.ESP_IDF_VERSION }}
+          esp_idf_version: ${{ matrix.idf }}
           target: ${{ matrix.target }}
           path: ci/${{ matrix.board }}
 
   arduino:
+    name: arduino (${{ matrix.board }})
     needs: matrix
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -78,22 +81,49 @@ jobs:
       matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v7
-      # Official install script (arduino/setup-arduino-cli still runs on deprecated Node 20).
-      - name: Install arduino-cli
-        run: |
-          mkdir -p "$HOME/.local/bin"
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$HOME/.local/bin" sh
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - uses: actions/cache@v6
-        with:
-          path: ~/.arduino15
-          key: arduino15-esp32-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: arduino15-esp32-${{ runner.os }}-
-      - name: Install esp32 core
-        run: |
-          arduino-cli core update-index --additional-urls "$ESP32_INDEX"
-          arduino-cli core install esp32:esp32 --additional-urls "$ESP32_INDEX"
+      - uses: ./.github/actions/arduino-esp32
       - name: Generate and compile sketch
         run: |
           python3 skills/ws-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework arduino --name ci_app --out ci/${{ matrix.board }}
           arduino-cli compile ci/${{ matrix.board }}/ci_app
+
+  arduino-display:
+    name: arduino display (${{ matrix.board }})
+    needs: matrix
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.matrix.outputs.arduino_display) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/arduino-esp32
+      - run: arduino-cli lib install "GFX Library for Arduino"
+      - name: Generate and compile display sketch
+        run: |
+          python3 skills/ws-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework arduino --with display --name ci_ui --out ci/${{ matrix.board }}
+          arduino-cli compile ci/${{ matrix.board }}/ci_ui
+
+  platformio:
+    name: platformio (${{ matrix.board }})
+    needs: matrix
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.platformio
+          key: pio-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: pio-${{ runner.os }}-
+      - run: python -m pip install -U platformio
+      - name: Generate and build
+        run: |
+          python skills/ws-esp32/scripts/wsesp.py new ${{ matrix.board }} --framework pio --name ci_app --out ci/${{ matrix.board }}
+          pio run -d ci/${{ matrix.board }}
