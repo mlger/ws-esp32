@@ -1,0 +1,32 @@
+name: Board request
+description: Ask for (or offer) a profile for a Waveshare board
+labels: ["board"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Exact product name
+      placeholder: ESP32-S3-Touch-LCD-2.8
+    validations:
+      required: true
+  - type: input
+    id: wiki
+    attributes:
+      label: Wiki / docs URL
+    validations:
+      required: true
+  - type: input
+    id: schematic
+    attributes:
+      label: Schematic URL (if available)
+  - type: dropdown
+    id: have
+    attributes:
+      label: Do you own this board?
+      options: ["Yes, I can test on hardware", "No"]
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to open the PR myself (see references/workflows/add-board.md)

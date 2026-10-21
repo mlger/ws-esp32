@@ -1,0 +1,41 @@
+{
+  "id": "esp32-s3-touch-lcd-1.28",
+  "name": "ESP32-S3-Touch-LCD-1.28",
+  "aliases": ["s3 round lcd", "1.28 touch", "gc9a01 round"],
+  "chip": "esp32s3",
+  "soc": "ESP32-S3R2",
+  "flash_mb": 16,
+  "psram_mb": 2,
+  "psram_mode": "quad",
+  "usb": {"native": false, "bridge": "CH343P", "console": "uart0"},
+  "verification": {
+    "status": "wiki",
+    "sources": ["https://www.waveshare.com/wiki/ESP32-S3-Touch-LCD-1.28"],
+    "checked": "2026-10-21",
+    "notes": "Pins transcribed from the wiki pin table. Not yet tested on hardware."
+  },
+  "peripherals": [
+    {"id": "spi", "kind": "bus", "protocol": "spi", "pins": {"sclk": 10, "mosi": 11, "miso": 12}},
+    {"id": "i2c", "kind": "bus", "protocol": "i2c", "pins": {"sda": 6, "scl": 7},
+     "notes": "Also routed to the SH1.0 expansion connector."},
+    {"id": "lcd", "kind": "display", "part": "GC9A01A", "bus": "spi", "interface": "spi",
+     "resolution": [240, 240], "pins": {"cs": 9, "dc": 8, "rst": 14, "bl": 2},
+     "panel_init": {"rgb_order": "bgr", "invert": true, "mirror_x": true, "mirror_y": false, "swap_xy": false,
+                    "gap": [0, 0], "pclk_mhz": 40, "verified": false,
+                    "source": "ESP-IDF peripherals/lcd/spi_lcd_touch example (GC9A01 settings)"},
+     "idf_components": ["espressif/esp_lcd_gc9a01"], "arduino_libs": ["TFT_eSPI@2.5.34", "lvgl@8.3.10"]},
+    {"id": "touch", "kind": "touch", "part": "CST816S", "bus": "i2c", "addr": "0x15",
+     "pins": {"int": 5, "rst": 13}, "idf_components": ["espressif/esp_lcd_touch_cst816s"]},
+    {"id": "imu", "kind": "imu", "part": "QMI8658", "bus": "i2c", "addr": null,
+     "pins": {"int1": 4, "int2": 3}, "notes": "I2C address not stated on the wiki (0x6A or 0x6B depending on SA0)."},
+    {"id": "battery", "kind": "adc", "pins": {"adc": 1},
+     "notes": "200K/100K divider. V = raw * 3.3 / 4096 * 3"},
+    {"id": "boot_button", "kind": "button", "pins": {"io": 0}, "soft": true}
+  ],
+  "free_pins": [15, 16, 17, 18, 19, 20, 21, 33],
+  "software": {"arduino_core": "2.0.12", "lvgl": "8.3.10", "esp_idf": null},
+  "warnings": [
+    "The wiki lists GPIO4/GPIO5 as both IMU/touch interrupts and MOSFET (vibration motor) control. Check the schematic before driving them.",
+    "GPIO19/20 are free here because USB goes through the CH343P bridge, but native USB on those pins is then unavailable."
+  ]
+}

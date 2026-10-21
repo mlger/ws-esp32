@@ -1,0 +1,13 @@
+{
+  "name": "waveshare-esp32-skill",
+  "owner": {
+    "name": "mlger"
+  },
+  "plugins": [
+    {
+      "name": "waveshare-esp32",
+      "source": "./",
+      "description": "Waveshare ESP32 board profiles, pin checks, project scaffolding and troubleshooting."
+    }
+  ]
+}

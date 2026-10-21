@@ -1,0 +1,49 @@
+{
+  "id": "esp32-s3-touch-lcd-4.3",
+  "name": "ESP32-S3-Touch-LCD-4.3",
+  "aliases": ["4.3 rgb", "s3 4.3 inch", "800x480"],
+  "chip": "esp32s3",
+  "soc": "ESP32-S3-WROOM-1-N16R8",
+  "flash_mb": 16,
+  "psram_mb": 8,
+  "psram_mode": "octal",
+  "usb": {"native": true, "bridge": "CH343P", "console": "uart0",
+          "notes": "Two Type-C ports: native USB (GPIO19/20) and a CH343P UART port. Native USB is muxed with CAN via CH422G EXIO5."},
+  "verification": {
+    "status": "wiki",
+    "sources": ["https://www.waveshare.com/wiki/ESP32-S3-Touch-LCD-4.3"],
+    "checked": "2026-10-21",
+    "notes": "Pins transcribed from the wiki. LCD controller name is inconsistent on the wiki (ST7262 datasheet vs ST7701 in the FAQ)."
+  },
+  "peripherals": [
+    {"id": "i2c", "kind": "bus", "protocol": "i2c", "pins": {"sda": 8, "scl": 9},
+     "reserved_addrs": ["0x20-0x27", "0x30-0x3F", "0x5D"],
+     "notes": "Shared by GT911, CH422G and the external I2C terminal."},
+    {"id": "spi", "kind": "bus", "protocol": "spi", "pins": {"mosi": 11, "sclk": 12, "miso": 13}},
+    {"id": "expander", "kind": "io_expander", "part": "CH422G", "bus": "i2c", "addr": null,
+     "pins": {}, "notes": "EXIO1=TP_RST, EXIO2=backlight, EXIO4=SD_CS, EXIO5=USB/CAN select. LCD reset is also on the expander (pin not given on the wiki)."},
+    {"id": "lcd", "kind": "display", "part": "ST7262", "interface": "rgb565", "resolution": [800, 480],
+     "pins": {"r3": 1, "r4": 2, "r5": 42, "r6": 41, "r7": 40,
+              "g2": 39, "g3": 0, "g4": 45, "g5": 48, "g6": 47, "g7": 21,
+              "b3": 14, "b4": 38, "b5": 18, "b6": 17, "b7": 10,
+              "vsync": 3, "hsync": 46, "de": 5, "pclk": 7, "bl": "EXIO2"},
+     "notes": "RGB timings are not on the wiki; copy them from Waveshare's demo (waveshare_rgb_lcd_port.h). Needs PSRAM frame buffers.",
+     "idf_components": ["espressif/esp_lvgl_port"],
+     "arduino_libs": ["ESP32_Display_Panel@0.1.4", "ESP32_IO_Expander@0.0.4", "lvgl@8.4.0"]},
+    {"id": "touch", "kind": "touch", "part": "GT911", "bus": "i2c", "addr": "0x5D",
+     "pins": {"int": 4, "rst": "EXIO1"}, "idf_components": ["espressif/esp_lcd_touch_gt911"]},
+    {"id": "sd", "kind": "storage", "part": "TF card", "bus": "spi", "pins": {"cs": "EXIO4"}},
+    {"id": "can", "kind": "can", "part": "TJA1051T/3", "pins": {"tx": 15, "rx": 16}, "share": "gpio15_16",
+     "notes": "Enabled when EXIO5 is high. 120R termination via jumper."},
+    {"id": "rs485", "kind": "uart", "part": "SP3485", "pins": {"tx": 15, "rx": 16}, "share": "gpio15_16",
+     "notes": "Same GPIOs as CAN; use one or the other. Auto direction."},
+    {"id": "usb", "kind": "usb", "pins": {"dm": 19, "dp": 20}}
+  ],
+  "free_pins": null,
+  "software": {"arduino_core": "3.0.7", "lvgl": "8.4.0", "esp_idf": "5.5.2"},
+  "warnings": [
+    "Almost every GPIO is used by the RGB panel. Check the wiki pinout image for the few spare pins before adding hardware.",
+    "Avoid I2C addresses 0x20-0x27, 0x30-0x3F and 0x5D on the shared bus.",
+    "Screen drift/tearing with Wi-Fi on is usually PSRAM bandwidth: enable CONFIG_SPIRAM_FETCH_INSTRUCTIONS / RODATA and use a bounce buffer."
+  ]
+}

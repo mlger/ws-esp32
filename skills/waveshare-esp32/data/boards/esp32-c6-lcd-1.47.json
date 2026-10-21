@@ -1,0 +1,38 @@
+{
+  "id": "esp32-c6-lcd-1.47",
+  "name": "ESP32-C6-LCD-1.47",
+  "aliases": ["c6 1.47", "c6 lcd stick"],
+  "chip": "esp32c6",
+  "soc": "ESP32-C6FH4",
+  "flash_mb": 4,
+  "psram_mb": 0,
+  "psram_mode": "none",
+  "usb": {"native": true, "bridge": null, "console": "usb_serial_jtag"},
+  "verification": {
+    "status": "wiki",
+    "sources": ["https://www.waveshare.com/wiki/ESP32-C6-LCD-1.47"],
+    "checked": "2026-10-21",
+    "notes": "Pins transcribed from the wiki. The wiki's Arduino section wrongly says 'ESP32S3 Dev Module'; use an ESP32-C6 target."
+  },
+  "peripherals": [
+    {"id": "spi", "kind": "bus", "protocol": "spi", "pins": {"mosi": 6, "sclk": 7, "miso": 5},
+     "notes": "Shared by the LCD and TF card."},
+    {"id": "lcd", "kind": "display", "part": "ST7789", "bus": "spi", "interface": "spi",
+     "resolution": [172, 320], "pins": {"cs": 14, "dc": 15, "rst": 21, "bl": 22},
+     "panel_init": {"rgb_order": "rgb", "invert": true, "mirror_x": false, "mirror_y": false, "swap_xy": false,
+                    "gap": [34, 0], "pclk_mhz": 40, "verified": false,
+                    "source": "Typical for 172x320 ST7789 IPS panels; confirm against the Waveshare demo"},
+     "notes": "172-px wide panels on a 240-px controller usually need x offset 34. Confirm against the demo.",
+     "idf_components": [], "arduino_libs": ["lvgl@8.3.10"]},
+    {"id": "sd", "kind": "storage", "part": "TF card", "bus": "spi", "pins": {"cs": 4}},
+    {"id": "rgb_led", "kind": "led", "part": "addressable RGB", "pins": {"data": 8}},
+    {"id": "boot_button", "kind": "button", "pins": {"io": 9}, "soft": true},
+    {"id": "usb", "kind": "usb", "pins": {"dm": 12, "dp": 13}}
+  ],
+  "free_pins": null,
+  "software": {"arduino_core": "3.0.2", "lvgl": "8.3.10", "esp_idf": "5.3.1"},
+  "warnings": [
+    "No PSRAM: keep LVGL draw buffers small (1/10 screen) and in internal RAM.",
+    "GPIO8 (RGB LED) and GPIO15 (LCD DC) are strapping pins; leave them as wired."
+  ]
+}

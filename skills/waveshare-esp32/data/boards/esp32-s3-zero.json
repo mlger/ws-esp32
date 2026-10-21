@@ -1,0 +1,28 @@
+{
+  "id": "esp32-s3-zero",
+  "name": "ESP32-S3-Zero",
+  "aliases": ["s3 zero", "s3 mini"],
+  "chip": "esp32s3",
+  "soc": "ESP32-S3FH4R2",
+  "flash_mb": 4,
+  "psram_mb": 2,
+  "psram_mode": "quad",
+  "usb": {"native": true, "bridge": null, "console": "usb_serial_jtag"},
+  "verification": {
+    "status": "wiki",
+    "sources": ["https://www.waveshare.com/wiki/ESP32-S3-Zero"],
+    "checked": "2026-10-21",
+    "notes": "The exposed GPIO list is only in the wiki pinout image, so free_pins is not filled in."
+  },
+  "peripherals": [
+    {"id": "rgb_led", "kind": "led", "part": "WS2812", "pins": {"data": 21}},
+    {"id": "boot_button", "kind": "button", "pins": {"io": 0}, "soft": true},
+    {"id": "usb", "kind": "usb", "pins": {"dm": 19, "dp": 20}}
+  ],
+  "free_pins": null,
+  "not_exposed": [33, 34, 35, 36, 37],
+  "software": {"arduino_core": null, "lvgl": null, "esp_idf": null},
+  "warnings": [
+    "Power the 5V pad with 3.7-6V and at least 500 mA. Keep the ceramic antenna clear of metal."
+  ]
+}

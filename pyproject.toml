@@ -1,0 +1,11 @@
+# Tooling config only; the skill itself has no install step.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["UP006", "UP007", "UP035", "UP045"]

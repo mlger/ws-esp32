@@ -1,0 +1,37 @@
+{
+  "id": "esp32-s3-lcd-1.47",
+  "name": "ESP32-S3-LCD-1.47",
+  "aliases": ["s3 1.47", "s3 lcd stick"],
+  "chip": "esp32s3",
+  "soc": "ESP32-S3R8",
+  "flash_mb": 16,
+  "psram_mb": 8,
+  "psram_mode": "octal",
+  "usb": {"native": true, "bridge": null, "console": "usb_serial_jtag"},
+  "verification": {
+    "status": "wiki",
+    "sources": ["https://www.waveshare.com/wiki/ESP32-S3-LCD-1.47"],
+    "checked": "2026-10-21",
+    "notes": "Pins transcribed from the wiki tables."
+  },
+  "peripherals": [
+    {"id": "spi", "kind": "bus", "protocol": "spi", "pins": {"mosi": 45, "sclk": 40}},
+    {"id": "lcd", "kind": "display", "part": "ST7789", "bus": "spi", "interface": "spi",
+     "resolution": [172, 320], "pins": {"cs": 42, "dc": 41, "rst": 39, "bl": 48},
+     "panel_init": {"rgb_order": "rgb", "invert": true, "mirror_x": false, "mirror_y": false, "swap_xy": false,
+                    "gap": [34, 0], "pclk_mhz": 40, "verified": false,
+                    "source": "Typical for 172x320 ST7789 IPS panels; confirm against the Waveshare demo"},
+     "notes": "172-px wide panels on a 240-px controller usually need x offset 34. Confirm against the demo.",
+     "idf_components": [], "arduino_libs": ["lvgl@8.3.10"]},
+    {"id": "sd", "kind": "storage", "part": "TF card", "interface": "sdmmc_4bit",
+     "pins": {"cmd": 15, "clk": 14, "d0": 16, "d1": 18, "d2": 17, "d3": 21}},
+    {"id": "rgb_led", "kind": "led", "part": "addressable RGB", "pins": {"data": 38}},
+    {"id": "boot_button", "kind": "button", "pins": {"io": 0}, "soft": true},
+    {"id": "usb", "kind": "usb", "pins": {"dm": 19, "dp": 20}}
+  ],
+  "free_pins": null,
+  "software": {"arduino_core": "3.0.2", "lvgl": "8.3.10", "esp_idf": null},
+  "warnings": [
+    "GPIO45 (LCD MOSI) is a strapping pin. Fine as wired by Waveshare; do not add external pull-ups to it."
+  ]
+}

@@ -1,0 +1,54 @@
+/*
+ * {{NAME}} - starter app for {{BOARD_NAME}}
+ * Prints chip/memory info and turns the backlight on if the board has one on a GPIO.
+ */
+#include <inttypes.h>
+#include <stdio.h>
+
+#include "driver/gpio.h"
+#include "esp_chip_info.h"
+#include "esp_flash.h"
+#include "esp_log.h"
+#include "esp_system.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "sdkconfig.h"
+#if CONFIG_SPIRAM
+#include "esp_psram.h"
+#endif
+
+#include "board_pins.h"
+{{DISPLAY_INCLUDE}}
+static const char *TAG = "{{NAME}}";
+
+void app_main(void)
+{
+    esp_chip_info_t info;
+    esp_chip_info(&info);
+    uint32_t flash_size = 0;
+    esp_flash_get_size(NULL, &flash_size);
+
+    ESP_LOGI(TAG, "Board: %s (%s)", WS_BOARD_NAME, WS_BOARD_SOC);
+    ESP_LOGI(TAG, "Cores: %d, chip rev v%d.%d, flash: %" PRIu32 " MB",
+             info.cores, info.revision / 100, info.revision % 100, flash_size / (1024 * 1024));
+#if CONFIG_SPIRAM
+    ESP_LOGI(TAG, "PSRAM: %u KB", (unsigned)(esp_psram_get_size() / 1024));
+#endif
+
+#if defined(APP_HAS_DISPLAY)
+    ESP_ERROR_CHECK(display_start());
+#elif defined(WS_LCD_BL)
+    gpio_config_t bl = {
+        .pin_bit_mask = 1ULL << WS_LCD_BL,
+        .mode = GPIO_MODE_OUTPUT,
+    };
+    ESP_ERROR_CHECK(gpio_config(&bl));
+    gpio_set_level(WS_LCD_BL, 1);
+    ESP_LOGI(TAG, "Backlight on (GPIO%d)", WS_LCD_BL);
+#endif
+
+    while (1) {
+        ESP_LOGI(TAG, "alive, free heap: %" PRIu32, esp_get_free_heap_size());
+        vTaskDelay(pdMS_TO_TICKS(5000));
+    }
+}

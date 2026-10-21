@@ -1,0 +1,12 @@
+{
+  "name": "waveshare-esp32",
+  "version": "0.1.0",
+  "description": "Agent skill for Waveshare ESP32 boards: verified board profiles, pin-conflict checks, project scaffolding (ESP-IDF, Arduino, PlatformIO), display/LVGL bring-up and troubleshooting.",
+  "author": {
+    "name": "mlger"
+  },
+  "homepage": "https://github.com/mlger/waveshare-esp32-skill",
+  "repository": "https://github.com/mlger/waveshare-esp32-skill",
+  "license": "MIT",
+  "keywords": ["esp32", "esp32-s3", "esp32-c6", "waveshare", "esp-idf", "arduino", "platformio", "lvgl", "embedded"]
+}

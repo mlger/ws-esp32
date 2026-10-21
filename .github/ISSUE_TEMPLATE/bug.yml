@@ -1,0 +1,29 @@
+name: Bug / wrong pin
+description: Something the skill did or said was wrong
+labels: ["bug"]
+body:
+  - type: input
+    id: board
+    attributes:
+      label: Board (profile id)
+      placeholder: esp32-s3-touch-lcd-1.28
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type
+      options: ["Wrong pin / board data", "Generated project does not build", "CLI error", "Bad advice from the agent", "Other"]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened and what you expected
+      description: For wrong pins, link the schematic or wiki section that shows the right value.
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Output of `python skills/waveshare-esp32/scripts/wsesp.py doctor`
+      render: text
