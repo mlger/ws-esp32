@@ -293,7 +293,7 @@ def main(argv=None) -> int:
     s.add_argument("elf", help="firmware ELF, e.g. build/app.elf")
     s.add_argument("log", help="file with the serial log, or '-' for stdin")
     s.add_argument("--board", help="board id (picks the right addr2line)")
-    s.add_argument("--chip", choices=["esp32", "esp32s3", "esp32c3", "esp32c6"])
+    s.add_argument("--chip", choices=["esp32", "esp32s3", "esp32c3", "esp32c6", "esp32p4"])
     s.add_argument("--addr2line", help="path to the toolchain's addr2line")
     s.set_defaults(fn=cmd_decode)
 

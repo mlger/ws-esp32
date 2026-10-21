@@ -8,12 +8,14 @@ import subprocess
 import sys
 from typing import Any, Dict, List, Optional
 
-CHIP_NAMES = {"ESP32": "esp32", "ESP32-S3": "esp32s3", "ESP32-C3": "esp32c3", "ESP32-C6": "esp32c6"}
+CHIP_NAMES = {"ESP32": "esp32", "ESP32-S3": "esp32s3", "ESP32-C3": "esp32c3", "ESP32-C6": "esp32c6",
+              "ESP32-P4": "esp32p4"}
 ADDR2LINE = {
     "esp32": "xtensa-esp32-elf-addr2line",
     "esp32s3": "xtensa-esp32s3-elf-addr2line",
     "esp32c3": "riscv32-esp-elf-addr2line",
     "esp32c6": "riscv32-esp-elf-addr2line",
+    "esp32p4": "riscv32-esp-elf-addr2line",
 }
 
 

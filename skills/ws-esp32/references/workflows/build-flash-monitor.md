@@ -27,7 +27,7 @@ Flashing normally resets the board into the bootloader by itself. If it says "Fa
 3. Release **BOOT** and flash again.
 4. On native USB boards, press **RESET** after flashing to start the app.
 
-The boot pin is GPIO0 on ESP32/S3 and GPIO9 on C3/C6.
+The boot pin is GPIO0 on ESP32/S3, GPIO9 on C3/C6 and GPIO35 on P4.
 
 ## Release binaries
 

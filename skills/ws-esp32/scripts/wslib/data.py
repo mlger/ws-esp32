@@ -13,7 +13,7 @@ BOARDS_DIR = DATA_DIR / "boards"
 TEMPLATES_DIR = SKILL_ROOT / "templates"
 
 VERIFICATION_LEVELS = ("partial", "wiki", "schematic", "hardware-tested")
-PSRAM_MODES = ("none", "quad", "octal")
+PSRAM_MODES = ("none", "quad", "octal", "hex")
 CONSOLES = ("uart0", "usb_serial_jtag")
 EXIO_RE = re.compile(r"^EXIO\d+$")
 ADDR_RE = re.compile(r"^0x[0-9A-Fa-f]{2}(-0x[0-9A-Fa-f]{2})?$")
@@ -61,6 +61,11 @@ def find_board(query: str, boards: Optional[Dict[str, Dict[str, Any]]] = None
     if len(hits) == 1:
         return boards[hits[0]], hits
     return None, hits
+
+
+def chip_revision(board: Dict[str, Any], chip: Dict[str, Any]) -> Dict[str, Any]:
+    """Revision-specific build settings (ESP32-P4 v1 vs v3), or {} if the chip has none."""
+    return (chip.get("revisions") or {}).get(board.get("chip_revision"), {})
 
 
 def chip_gpios(chip: Dict[str, Any]) -> List[int]:
@@ -126,6 +131,12 @@ def validate_board(board: Dict[str, Any], chips: Dict[str, Any]) -> List[str]:
         errs.append(f"{bid}: psram_mode must be one of {PSRAM_MODES}")
     if (board["psram_mb"] == 0) != (board["psram_mode"] == "none"):
         errs.append(f"{bid}: psram_mb and psram_mode disagree")
+    revisions = chip.get("revisions")
+    rev = board.get("chip_revision")
+    if revisions and rev not in revisions:
+        errs.append(f"{bid}: chip_revision must be one of {sorted(revisions)} for {chip['name']}")
+    elif rev is not None and not revisions:
+        errs.append(f"{bid}: chip_revision is only used for chips with a revisions map")
     usb = board["usb"]
     if usb.get("console") not in CONSOLES:
         errs.append(f"{bid}: usb.console must be one of {CONSOLES}")
