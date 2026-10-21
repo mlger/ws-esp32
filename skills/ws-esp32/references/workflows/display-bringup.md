@@ -8,9 +8,13 @@ For boards where `wsesp.py show <board>` reports "Display codegen: yes", generat
 python scripts/wsesp.py new <board> --framework idf --with display --name ui --out ./ui
 ```
 
-This adds `main/display.c` (SPI bus, panel driver, optional touch, esp_lvgl_port, LVGL 9 demo screen) and turns on the needed components in `idf_component.yml`. The panel settings (`LCD_INVERT`, `LCD_RGB_ORDER`, `LCD_GAP_X/Y`, `LCD_MIRROR_*`) are `#define`s at the top of `display.c` and come from the profile's `panel_init`. If `panel_init.verified` is false, tell the user the picture may need one of those flipped (see the symptom table below). Once they confirm what works, update the profile.
+This adds `main/display.c` (panel driver, optional touch, esp_lvgl_port, LVGL 9 demo screen) and turns on the needed components in `idf_component.yml`.
 
-Not generated yet: RGB panels (4.3", needs vendor timings plus CH422G), QSPI AMOLED (pins unknown), and Arduino. For those, use the manual steps below.
+- **SPI panels** (ST7789, GC9A01, optional CST816S touch): 1.28", 1.47" S3/C6, 2.8".
+- **RGB panels with a CH422G expander** (4.3", 7"): timings come from the profile's `rgb_timing` (copied from Waveshare's demo). The code brings up the CH422G (backlight, LCD reset, GT911 reset sequence), uses two PSRAM frame buffers with a bounce buffer, and adds the PSRAM XIP options to `sdkconfig.defaults`.
+- **Arduino** (`--framework arduino --with display`): Arduino_GFX sketch for SPI panels. Install the "GFX Library for Arduino" library first. The panel settings (`LCD_INVERT`, `LCD_RGB_ORDER`, `LCD_GAP_X/Y`, `LCD_MIRROR_*`) are `#define`s at the top of `display.c` and come from the profile's `panel_init`. If `panel_init.verified` is false, tell the user the picture may need one of those flipped (see the symptom table below). Once they confirm what works, update the profile.
+
+Not generated yet: QSPI AMOLED (SH8601), CST328 touch, RGB panels on Arduino, and PlatformIO. For those, use the manual steps below.
 
 ## Manual bring-up
 

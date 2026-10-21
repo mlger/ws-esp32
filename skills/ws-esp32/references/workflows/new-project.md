@@ -9,7 +9,7 @@
    ```bash
    python scripts/wsesp.py new <board> --framework idf|arduino|pio --name <name> --out <dir>
    ```
-   Add `--dry-run` to list the files without writing them. The command won't overwrite existing files unless you pass `--force`. Ask the user before using it.
+   Extras: `--with display` (screen + LVGL, see `display-bringup.md`) and `--with devcontainer` (VS Code dev container with the right toolchain). Add `--dry-run` to list the files without writing them. The command won't overwrite existing files unless you pass `--force`. Ask the user before using it.
 4. **Build it unchanged first.** That proves the toolchain works before you add features. See `build-flash-monitor.md`.
 5. **Add features one at a time.** Run `wsesp.py pins` for any new pin, then build, flash and check the serial log after each step.
 

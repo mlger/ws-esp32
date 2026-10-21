@@ -19,6 +19,8 @@ Use this when a user's board has no profile, or when you're contributing one to 
 
 ## Steps
 
+Profiles follow `data/board.schema.json`. Editors that support JSON Schema (VS Code does, through the `$schema` line) give autocomplete and inline errors.
+
 1. Copy the closest existing file in `data/boards/` to `data/boards/<id>.json`. The id is the product name in lowercase, for example `esp32-s3-touch-lcd-2.8`.
 2. Fill in `chip` (a key from `data/chips.json`), `soc` (exact part, for example `ESP32-S3R8`), `flash_mb`, `psram_mb`, `psram_mode`, and `usb`.
    - In the part number, `R8` means 8 MB octal PSRAM, `R2` 2 MB quad, `N16` 16 MB flash, and `FH4` 4 MB in-package flash.
@@ -30,6 +32,7 @@ Use this when a user's board has no profile, or when you're contributing one to 
    - Things the user may still use (the BOOT button) get `"soft": true`, which turns conflicts into warnings.
    - Native USB pins as a `usb` peripheral with `dm`/`dp`.
    - Pins that exist on the chip but have no pad on the board go in `not_exposed`.
+   - For RGB displays, add `rgb_timing` (pclk_hz, porches, pulse widths, source) copied from Waveshare's demo `waveshare_lcd_port.h`.
    - For SPI displays, add `panel_init` (`rgb_order`, `invert`, `mirror_x/y`, `swap_xy`, `gap`, `pclk_mhz`, `verified`, `source`) so `new --with display` can generate working code. Set `verified: true` only after seeing a correct image on hardware.
 4. Use `free_pins` only if the source lists the broken-out pins. Otherwise leave it `null`.
 5. Fill in `software` with the versions Waveshare's demos use.
@@ -43,6 +46,6 @@ Use this when a user's board has no profile, or when you're contributing one to 
 
 ## Peripheral `kind` values
 
-`bus`, `display`, `touch`, `imu`, `rtc`, `pmu`, `codec`, `io_expander`, `storage`, `led`, `button`, `adc`, `can`, `uart`, `usb`, `camera`, `sensor`.
+`bus`, `display`, `touch`, `imu`, `rtc`, `pmu`, `codec`, `io_expander`, `storage`, `led`, `button`, `adc`, `can`, `uart`, `usb`, `camera`, `sensor`, `ethernet`.
 
 Signal names used for `board_pins.h` macros: keep them short and lowercase (`cs`, `dc`, `rst`, `bl`, `int`, `sda`, `scl`, `mosi`, `miso`, `sclk`, `tx`, `rx`, `data`, `io`). The generated macro is `WS_<PERIPHERAL>_<SIGNAL>`, for example `WS_LCD_BL`.
