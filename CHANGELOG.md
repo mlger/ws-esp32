@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+- ESP32-P4 chip rules (strapping, USB Serial/JTAG, UART0, JTAG, ADC) from Espressif's datasheet and ESP-IDF docs.
+- Board profiles: ESP32-P4-NANO (partial) and ESP32-P4-NANO-WIFI6-DB.
+- `psram_mode: "hex"` for the P4's in-package PSRAM, `chip_revision` for P4 v1.x vs v3.x builds, and the `wireless` peripheral kind for Wi-Fi coprocessors.
+- `new` sets the P4 revision in `sdkconfig.defaults`, the Arduino `ChipVariant` menu and the PlatformIO board.
+
 ## [0.1.0] - 2026-10-21
 
 First release.

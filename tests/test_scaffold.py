@@ -53,6 +53,18 @@ def test_fqbn(boards, chips):
     assert arduino_fqbn(b, chips[b["chip"]]) == "esp32:esp32:esp32c6:FlashSize=4M,CDCOnBoot=cdc"
 
 
+def test_p4_revisions(boards, chips):
+    v1, v3 = boards["esp32-p4-nano"], boards["esp32-p4-nano-wifi6-db"]
+    s = sdkconfig_defaults(v1, chips["esp32p4"])
+    assert "CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y" in s and "CONFIG_SPIRAM_MODE_HEX=y" in s
+    assert "# CONFIG_ESP32P4_SELECTS_REV_LESS_V3 is not set" in sdkconfig_defaults(v3, chips["esp32p4"])
+    assert arduino_fqbn(v1, chips["esp32p4"]) == "esp32:esp32:esp32p4:FlashSize=16M,PSRAM=enabled,ChipVariant=prev3"
+    assert arduino_fqbn(v3, chips["esp32p4"]).endswith("ChipVariant=postv3")
+    assert "board = esp32-p4\n" in platformio_ini(v1, chips["esp32p4"], "app")
+    ini = platformio_ini(v3, chips["esp32p4"], "app")
+    assert "board = esp32-p4_r3" in ini and "memory_type" not in ini
+
+
 def test_platformio(boards, chips):
     b = boards["esp32-s3-touch-lcd-1.28"]
     ini = platformio_ini(b, chips[b["chip"]], "app")

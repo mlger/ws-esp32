@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .data import TEMPLATES_DIR
+from .data import TEMPLATES_DIR, chip_revision
 from .display import display_dependencies, display_sdkconfig, render_arduino_display, render_display
 
 FRAMEWORKS = ("idf", "arduino", "pio")
@@ -63,6 +63,11 @@ def arduino_fqbn(board: Dict[str, Any], chip: Dict[str, Any]) -> str:
     if board["chip"] in ("esp32s3", "esp32"):
         opts.append({"octal": "PSRAM=opi", "quad": "PSRAM=enabled"}.get(board["psram_mode"],
                                                                           "PSRAM=disabled"))
+    elif board["chip"] == "esp32p4":
+        opts.append("PSRAM=disabled" if board["psram_mode"] == "none" else "PSRAM=enabled")
+    menu = chip_revision(board, chip).get("arduino_menu")
+    if menu:
+        opts.append(menu)
     if board["usb"].get("console") == "usb_serial_jtag":
         opts.append("CDCOnBoot=cdc")
     return f"esp32:esp32:{chip['arduino_board']}:" + ",".join(opts)
@@ -76,10 +81,14 @@ def sdkconfig_defaults(board: Dict[str, Any], chip: Dict[str, Any]) -> str:
         "CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y",
         "CONFIG_FREERTOS_HZ=1000",
     ]
-    if board["psram_mode"] != "none":
+    lines += chip_revision(board, chip).get("sdkconfig", [])
+    mode = board["psram_mode"]
+    if mode != "none":
+        # ESP32-P4 in-package PSRAM is 16-line ("hex") and runs at 200 MHz by default.
         lines += ["CONFIG_SPIRAM=y",
-                  "CONFIG_SPIRAM_MODE_OCT=y" if board["psram_mode"] == "octal" else "CONFIG_SPIRAM_MODE_QUAD=y",
-                  "CONFIG_SPIRAM_SPEED_80M=y"]
+                  {"octal": "CONFIG_SPIRAM_MODE_OCT=y", "quad": "CONFIG_SPIRAM_MODE_QUAD=y",
+                   "hex": "CONFIG_SPIRAM_MODE_HEX=y"}[mode],
+                  "CONFIG_SPIRAM_SPEED_200M=y" if mode == "hex" else "CONFIG_SPIRAM_SPEED_80M=y"]
     if board["usb"].get("console") == "usb_serial_jtag":
         lines.append("CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y")
     return "\n".join(lines) + "\n"
@@ -108,7 +117,7 @@ def platformio_ini(board: Dict[str, Any], chip: Dict[str, Any], name: str) -> st
         "; pioarduino provides Arduino-ESP32 3.x (the official platform is still on 2.x).",
         f"[env:{name}]",
         f"platform = {PIO_PLATFORM}",
-        f"board = {chip['pio_board']}",
+        f"board = {chip_revision(board, chip).get('pio_board', chip['pio_board'])}",
         "framework = arduino",
         "monitor_speed = 115200",
         "monitor_filters = esp32_exception_decoder",
@@ -117,9 +126,10 @@ def platformio_ini(board: Dict[str, Any], chip: Dict[str, Any], name: str) -> st
     partitions = {4: "default.csv", 8: "default_8MB.csv", 16: "default_16MB.csv"}.get(board["flash_mb"])
     if partitions:
         lines.append(f"board_build.partitions = {partitions}")
-    if board["psram_mode"] != "none":
+    if board["psram_mode"] in ("octal", "quad"):
         lines.append("board_build.arduino.memory_type = "
                      + ("qio_opi" if board["psram_mode"] == "octal" else "qio_qspi"))
+    if board["psram_mode"] != "none":
         flags.append("-DBOARD_HAS_PSRAM")
     if board["usb"].get("console") == "usb_serial_jtag":
         flags += ["-DARDUINO_USB_MODE=1", "-DARDUINO_USB_CDC_ON_BOOT=1"]

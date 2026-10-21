@@ -18,7 +18,7 @@
 | File | Purpose |
 |---|---|
 | `board_pins.h` | `WS_*` macros for every onboard pin, I2C address and screen size. Unknown pins appear as comments. |
-| `sdkconfig.defaults` (IDF) | Target, flash size, PSRAM mode (quad/octal), console (UART vs USB-Serial-JTAG), large app partition, 1 kHz tick |
+| `sdkconfig.defaults` (IDF) | Target, flash size, PSRAM mode (quad/octal/hex), ESP32-P4 chip revision, console (UART vs USB-Serial-JTAG), large app partition, 1 kHz tick |
 | `main/idf_component.yml` (IDF) | Driver components for the board's display and touch, commented out |
 | `sketch.yaml` (Arduino) | `default_fqbn` with the right FlashSize / PSRAM / CDCOnBoot options |
 | `platformio.ini` (PIO) | pioarduino platform, flash size, partitions, PSRAM memory type, USB CDC flags |

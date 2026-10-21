@@ -10,11 +10,12 @@
     "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.\\-]*$", "description": "Lowercase product name; must match the file name"},
     "name": {"type": "string", "description": "Exact Waveshare product name"},
     "aliases": {"type": "array", "items": {"type": "string"}},
-    "chip": {"enum": ["esp32", "esp32s3", "esp32c3", "esp32c6"], "description": "Key in data/chips.json"},
+    "chip": {"enum": ["esp32", "esp32s3", "esp32c3", "esp32c6", "esp32p4"], "description": "Key in data/chips.json"},
     "soc": {"type": "string", "description": "Exact part, e.g. ESP32-S3R8 or ESP32-S3-WROOM-1-N16R8"},
     "flash_mb": {"type": "integer", "minimum": 1},
     "psram_mb": {"type": "integer", "minimum": 0},
-    "psram_mode": {"enum": ["none", "quad", "octal"]},
+    "psram_mode": {"enum": ["none", "quad", "octal", "hex"], "description": "hex = 16-line in-package PSRAM (ESP32-P4)"},
+    "chip_revision": {"type": "string", "description": "Key in the chip's revisions map in data/chips.json (ESP32-P4: v1 or v3)"},
     "usb": {
       "type": "object",
       "required": ["native", "console"],
@@ -64,7 +65,7 @@
       "properties": {
         "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
         "kind": {"enum": ["bus", "display", "touch", "imu", "rtc", "pmu", "codec", "io_expander", "storage", "led",
-                          "button", "adc", "can", "uart", "usb", "camera", "sensor", "ethernet"]},
+                          "button", "adc", "can", "uart", "usb", "camera", "sensor", "ethernet", "wireless"]},
         "part": {"type": "string"},
         "protocol": {"enum": ["i2c", "spi"]},
         "bus": {"type": "string"},

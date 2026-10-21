@@ -14,7 +14,7 @@ def test_all_profiles_valid(boards, chips):
 
 
 def test_at_least_one_board(boards):
-    assert len(boards) >= 11
+    assert len(boards) >= 13
 
 
 @pytest.mark.parametrize("query,expected", [
@@ -25,6 +25,8 @@ def test_at_least_one_board(boards):
     ("7", "esp32-s3-touch-lcd-7"),
     ("2.8", "esp32-s3-touch-lcd-2.8"),
     ("1.28", "esp32-s3-touch-lcd-1.28"),
+    ("p4 nano", "esp32-p4-nano"),
+    ("p4 nano wifi6", "esp32-p4-nano-wifi6-db"),
 ])
 def test_find_board(boards, query, expected):
     board, _ = find_board(query, boards)
@@ -70,6 +72,16 @@ def test_psram_mode_consistency(boards, chips):
     b = _base(boards)
     b["psram_mode"] = "octal"
     assert any("disagree" in e for e in validate_board(b, chips))
+
+
+def test_p4_needs_revision(boards, chips):
+    b = copy.deepcopy(boards["esp32-p4-nano"])
+    b.pop("_path", None)
+    b.pop("chip_revision")
+    assert any("chip_revision" in e for e in validate_board(b, chips))
+    c = _base(boards)
+    c["chip_revision"] = "v1"
+    assert any("chip_revision" in e for e in validate_board(c, chips))
 
 
 def test_versions_in_sync():

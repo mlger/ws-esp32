@@ -36,7 +36,7 @@ arduino-cli core install esp32:esp32@3.0.7     # pick the board's software.ardui
 ```
 
 Notes:
-- ESP32-C6 needs core 3.x.
+- ESP32-C6 needs core 3.x. ESP32-P4 needs 3.2 or newer; pick the right Tools > Chip Variant (before v3.00 / v3.00 or newer).
 - ESP32-S3-Touch-LCD-1.28 demos target core 2.0.12. Its TFT_eSPI setup does not build on 3.x without changes.
 - In the Arduino IDE, add the same URL under Preferences, then install "esp32 by Espressif Systems" from Boards Manager.
 

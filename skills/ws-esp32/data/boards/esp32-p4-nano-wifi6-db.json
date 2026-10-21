@@ -1,0 +1,151 @@
+{
+  "$schema": "../board.schema.json",
+  "id": "esp32-p4-nano-wifi6-db",
+  "name": "ESP32-P4-NANO-WIFI6-DB",
+  "aliases": [
+    "p4 nano wifi6",
+    "p4 nano wifi6 db",
+    "esp32-p4-nano-wifi6"
+  ],
+  "chip": "esp32p4",
+  "chip_revision": "v3",
+  "soc": "ESP32-P4NRW32X",
+  "flash_mb": 16,
+  "psram_mb": 32,
+  "psram_mode": "hex",
+  "usb": {
+    "native": false,
+    "bridge": "CH343P",
+    "console": "uart0",
+    "notes": "The Type-C port goes through a CH343P to UART0 (GPIO37/38). The Type-A port is USB 2.0 High-Speed OTG on dedicated pads, not GPIOs."
+  },
+  "verification": {
+    "status": "wiki",
+    "sources": [
+      "https://github.com/waveshareteam/ESP32-P4-NANO-WIFI6-DB/blob/main/docs/en/hw-reference/user-guide-esp32-p4-nano-wifi6-db.md",
+      "https://github.com/waveshareteam/ESP32-P4-NANO-WIFI6-DB/blob/main/components/esp32_p4_nano_wifi6_db/include/bsp/esp32_p4_nano_wifi6_db.h",
+      "https://github.com/waveshareteam/ESP32-P4-NANO-WIFI6-DB/blob/main/hardware/schematics/ESP32-P4-NANO-WIFI6-DB.pdf",
+      "https://docs.waveshare.net/ESP32-P4-NANO-WIFI6-DB/",
+      "https://www.espressif.com/sites/default/files/documentation/esp32-p4_datasheet_en.pdf"
+    ],
+    "checked": "2026-10-21",
+    "notes": "Pins from the hardware guide's GPIO allocation table and the BSP header. CH343P on GPIO37/38 checked in the schematic. Chip revision v3 from the X suffix (datasheet table 1-1) and the BSP's ESP-IDF >= 5.5 requirement."
+  },
+  "peripherals": [
+    {
+      "id": "i2c",
+      "kind": "bus",
+      "protocol": "i2c",
+      "pins": {
+        "sda": 7,
+        "scl": 8
+      },
+      "reserved_addrs": ["0x14", "0x45", "0x5D"],
+      "notes": "Shared with the display connector (GT911 touch 0x5D/0x14, backlight 0x45) and camera SCCB."
+    },
+    {
+      "id": "codec",
+      "kind": "codec",
+      "part": "ES8311",
+      "bus": "i2c",
+      "addr": "0x18",
+      "interface": "i2s",
+      "pins": {
+        "mclk": 13,
+        "sclk": 12,
+        "lrck": 10,
+        "dout": 9,
+        "din": 11
+      },
+      "notes": "dout = P4 to codec DSDIN, din = codec ASDOUT to P4.",
+      "idf_components": ["espressif/esp_codec_dev"]
+    },
+    {
+      "id": "speaker_amp",
+      "kind": "codec",
+      "part": "Speaker amplifier",
+      "pins": {
+        "en": 53
+      },
+      "notes": "Active high. GPIO53 is also on the header."
+    },
+    {
+      "id": "sd",
+      "kind": "storage",
+      "part": "TF card (SDMMC 4-bit)",
+      "interface": "sdmmc",
+      "pins": {
+        "clk": 43,
+        "cmd": 44,
+        "d0": 39,
+        "d1": 40,
+        "d2": 41,
+        "d3": 42,
+        "pwr": 45
+      },
+      "notes": "Slot 0. pwr is active low. Card IO is powered from on-chip LDO channel 4. GPIO45 is also on the header."
+    },
+    {
+      "id": "eth",
+      "kind": "ethernet",
+      "part": "IP101GRI",
+      "interface": "rmii",
+      "pins": {
+        "txd0": 34,
+        "txd1": 35,
+        "tx_en": 49,
+        "rxd0": 29,
+        "rxd1": 30,
+        "crs_dv": 28,
+        "ref_clk": 50,
+        "mdc": 31,
+        "mdio": 52,
+        "rst": 51
+      },
+      "share": "gpio35_boot",
+      "notes": "Internal EMAC over RMII, PHY address 1. REF_CLK is a 50 MHz clock from the PHY. Optional PoE module."
+    },
+    {
+      "id": "wifi",
+      "kind": "wireless",
+      "part": "ESP32-C5-MINI-1U",
+      "interface": "sdio",
+      "pins": {
+        "clk": 18,
+        "cmd": 19,
+        "d0": 14,
+        "d1": 15,
+        "d2": 16,
+        "d3": 17,
+        "rst": 54,
+        "io2": 6
+      },
+      "notes": "Wi-Fi 6 (2.4/5 GHz) / Bluetooth 5 LE coprocessor with external antenna. Use esp_wifi_remote + esp_hosted (SDIO host). rst drives C5 CHIP_PU (low = reset). GPIO54 and GPIO6 are also on the header.",
+      "idf_components": ["espressif/esp_wifi_remote", "espressif/esp_hosted"]
+    },
+    {
+      "id": "boot_button",
+      "kind": "button",
+      "pins": {
+        "io": 35
+      },
+      "soft": true,
+      "share": "gpio35_boot"
+    }
+  ],
+  "free_pins": [2, 3, 4, 5, 20, 21, 22, 23, 24, 25, 26, 27, 32, 33, 36, 46, 47, 48],
+  "software": {
+    "arduino_core": null,
+    "lvgl": null,
+    "esp_idf": "5.5.2"
+  },
+  "warnings": [
+    "Waveshare's hardware guide says the ESP32-P4NRW32X has 16 MB of PSRAM, but the part number (and Espressif's datasheet) means 32 MB. The profile uses 32 MB. Check with `wsesp.py detect` on your board.",
+    "This board has a v3.x chip, so it needs ESP-IDF 5.5 or newer built for revision >= 3.0 (the generated sdkconfig.defaults does this). Firmware built for the older ESP32-P4-NANO (v1.x chip) does not boot on it.",
+    "GPIO35 is both the BOOT button and Ethernet RMII TXD1. Don't hold BOOT while Ethernet is running, and don't attach anything that pulls GPIO35 low at reset.",
+    "GPIO36 is a strapping pin with an external pull-up on the header. GPIO34/35 (Ethernet) and GPIO37/38 (UART0) are also strapping pins.",
+    "GPIO0/1 are on the header but wired to the 32 kHz crystal. Waveshare's docs say to remove R32/R36 before using them as GPIO.",
+    "GPIO24-27 are on the header and default to the USB 1.1 PHY functions (GPIO24/25 = USB Serial/JTAG). Reconfiguring them disables those.",
+    "Not the same board as the ESP32-P4-NANO: the coprocessor is an ESP32-C5 and GPIO45 switches SD card power."
+  ]
+}

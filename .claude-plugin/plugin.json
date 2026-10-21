@@ -8,5 +8,5 @@
   "homepage": "https://github.com/mlger/ws-esp32",
   "repository": "https://github.com/mlger/ws-esp32",
   "license": "MIT",
-  "keywords": ["esp32", "esp32-s3", "esp32-c6", "waveshare", "esp-idf", "arduino", "platformio", "lvgl", "embedded"]
+  "keywords": ["esp32", "esp32-s3", "esp32-c6", "esp32-p4", "waveshare", "esp-idf", "arduino", "platformio", "lvgl", "embedded"]
 }

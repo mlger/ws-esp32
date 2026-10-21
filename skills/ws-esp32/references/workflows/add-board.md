@@ -22,8 +22,8 @@ Use this when a user's board has no profile, or when you're contributing one to 
 Profiles follow `data/board.schema.json`. Editors that support JSON Schema (VS Code does, through the `$schema` line) give autocomplete and inline errors.
 
 1. Copy the closest existing file in `data/boards/` to `data/boards/<id>.json`. The id is the product name in lowercase, for example `esp32-s3-touch-lcd-2.8`.
-2. Fill in `chip` (a key from `data/chips.json`), `soc` (exact part, for example `ESP32-S3R8`), `flash_mb`, `psram_mb`, `psram_mode`, and `usb`.
-   - In the part number, `R8` means 8 MB octal PSRAM, `R2` 2 MB quad, `N16` 16 MB flash, and `FH4` 4 MB in-package flash.
+2. Fill in `chip` (a key from `data/chips.json`), `soc` (exact part, for example `ESP32-S3R8`), `flash_mb`, `psram_mb`, `psram_mode`, and `usb`. ESP32-P4 boards also need `chip_revision` (`v1` or `v3`, see `references/chips.md`).
+   - In the part number, `R8` means 8 MB octal PSRAM, `R2` 2 MB quad, `N16` 16 MB flash, and `FH4` 4 MB in-package flash. ESP32-P4 PSRAM is in the package and 16-line: use `"psram_mode": "hex"` (P4NRW16 = 16 MB, P4NRW32 = 32 MB).
 3. Add peripherals:
    - Shared buses as `kind: "bus"` (`i2c`, `spi`) with their pins. Devices on them use `"bus": "<id>"` and their own pins (CS, DC, INT...).
    - I2C addresses as `"addr": "0x15"`. Add `"addr_verified": false` if the address is a typical value rather than documented.
@@ -46,6 +46,6 @@ Profiles follow `data/board.schema.json`. Editors that support JSON Schema (VS C
 
 ## Peripheral `kind` values
 
-`bus`, `display`, `touch`, `imu`, `rtc`, `pmu`, `codec`, `io_expander`, `storage`, `led`, `button`, `adc`, `can`, `uart`, `usb`, `camera`, `sensor`, `ethernet`.
+`bus`, `display`, `touch`, `imu`, `rtc`, `pmu`, `codec`, `io_expander`, `storage`, `led`, `button`, `adc`, `can`, `uart`, `usb`, `camera`, `sensor`, `ethernet`, `wireless` (a Wi-Fi/BT coprocessor, for example the ESP32-C6 on P4 boards).
 
 Signal names used for `board_pins.h` macros: keep them short and lowercase (`cs`, `dc`, `rst`, `bl`, `int`, `sda`, `scl`, `mosi`, `miso`, `sclk`, `tx`, `rx`, `data`, `io`). The generated macro is `WS_<PERIPHERAL>_<SIGNAL>`, for example `WS_LCD_BL`.
