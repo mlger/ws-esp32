@@ -21,8 +21,10 @@ def test_header_exio_and_unknown(boards):
     h = render_header(boards["esp32-s3-touch-lcd-4.3"])
     assert "#define WS_LCD_BL_EXIO 2" in h
     assert "#define WS_LCD_BL " not in h  # must not look like a GPIO
-    h2 = render_header(boards["esp32-s3-touch-amoled-1.8"])
-    assert "/* WS_LCD_CS: unknown" in h2
+    import copy
+    b = copy.deepcopy(boards["esp32-c6-zero"])
+    b["peripherals"][0]["pins"]["data"] = None
+    assert "/* WS_RGB_LED_DATA: unknown" in render_header(b)
 
 
 def test_header_no_duplicate_macros(boards):
